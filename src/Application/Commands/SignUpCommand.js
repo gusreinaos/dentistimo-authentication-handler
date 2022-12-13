@@ -8,27 +8,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserRepository = void 0;
-const UserSchema_1 = __importDefault(require("../Models/UserSchema"));
-class UserRepository {
-    getUser(email, password) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield UserSchema_1.default.findOne({ email: email, password: password });
-        });
+exports.SignUpCommand = void 0;
+const User_1 = require("../../Domain/Entities/User");
+const JwtUtils_1 = require("../../Domain/Utils/JwtUtils");
+class SignUpCommand {
+    constructor(userRepository) {
+        this.userRepository = userRepository;
     }
-    createUser(user) {
+    execute(jwt) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield UserSchema_1.default.create(user);
-        });
-    }
-    updateUser(user) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield UserSchema_1.default.findOneAndUpdate({ email: user.email }, user);
+            const payload = (0, JwtUtils_1.decodeJWT)(jwt);
+            const user = new User_1.User(jwt, payload.name, payload.email, payload.password);
+            return yield this.userRepository.createUser(user);
         });
     }
 }
-exports.UserRepository = UserRepository;
+exports.SignUpCommand = SignUpCommand;

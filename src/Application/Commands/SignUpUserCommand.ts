@@ -2,7 +2,7 @@ import {User} from '../../Domain/Entities/User';
 import {decodeJWT} from '../../Domain/Utils/JwtUtils';
 import {UserRepository} from '../../Infrastructure/Repositories/UserRepository';
 
-export class CreateUserCommand {
+export class SignUpUserCommand {
   constructor(readonly userRepository: UserRepository) {}
 
   async execute(jwt: string): Promise<User | null> {

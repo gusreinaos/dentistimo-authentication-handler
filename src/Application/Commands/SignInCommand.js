@@ -33,24 +33,24 @@ const __awaiter =
     });
   };
 Object.defineProperty(exports, '__esModule', {value: true});
-exports.CreateUserCommand = void 0;
+exports.SignInCommand = void 0;
+/* eslint-disable prettier/prettier */
 const User_1 = require('../../Domain/Entities/User');
 const JwtUtils_1 = require('../../Domain/Utils/JwtUtils');
-class CreateUserCommand {
-  constructor(userRepository) {
-    this.userRepository = userRepository;
-  }
-  execute(jwt) {
-    return __awaiter(this, void 0, void 0, function* () {
-      const payload = (0, JwtUtils_1.decodeJWT)(jwt);
-      const user = new User_1.User(
-        jwt,
-        payload.name,
-        payload.email,
-        payload.password
-      );
-      return yield this.userRepository.createUser(user);
-    });
-  }
+class SignInCommand {
+    constructor(userRepository) {
+        this.userRepository = userRepository;
+    }
+    execute(jwt) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = (0, JwtUtils_1.decodeJWT)(jwt);
+            const founduser = this.userRepository.getUser(payload.email, payload.password);
+            if (founduser === null) {
+                return null;
+            }
+            const newUser = new User_1.User(jwt, payload.name, payload.email, payload.password);
+            return this.userRepository.updateUser(newUser);
+        });
+    }
 }
-exports.CreateUserCommand = CreateUserCommand;
+exports.SignInCommand = SignInCommand;
