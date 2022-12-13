@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import {User} from '../Entities/User';
+import { IUser } from './IUser';
 
 export interface IUserRepository {
   getUser(email: string, password: string): Promise<User | null>;
-  createUser(jwtToken: string, name: string, email: string, password: string): Promise<User | null>;
+  createUser(user: IUser): Promise<User | null>;
 }
