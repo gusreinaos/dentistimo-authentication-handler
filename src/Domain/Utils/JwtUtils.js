@@ -1,5 +1,10 @@
-import jwt from 'jsonwebtoken';
-
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.decodeJWT = exports.verifyJWT = exports.signJWT = void 0;
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const privateKey = `
 -----BEGIN RSA PRIVATE KEY-----
 MIICWwIBAAKBgHgnvr7O2tiApjJfid1orFnIGm6980fZp+Lpbjo+NC/0whMFga2B
@@ -16,30 +21,30 @@ V1QqBneBbK10PzVuFV8QtrJhJyxRVwrtbKq38iMNuqUnI4+ijXEUpJFWVvv6nKXo
 7McQvEk12dU/JNTX8wJAOlAtSNjp9tVwpMpC0w2St1eKc1L2SknjeohA5ldoBz8s
 GeZsPhTU3eHSD1neAZXLKN5K68z3zFBr20ubY9nyLw==
 -----END RSA PRIVATE KEY-----`;
-
 const publicKey = `-----BEGIN PUBLIC KEY-----
 MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHgnvr7O2tiApjJfid1orFnIGm69
 80fZp+Lpbjo+NC/0whMFga2Biw5b1G2Q/B2u0tpO1Fs/E8z7Lv1nYfr5jx2S8x6B
 dA4TS2kB9Kf0wn0+7wSlyikHoKhbtzwXHZl17GsyEi6wHnsqNBSauyIWhpha8i+Y
 +3GyaOY536H47qyXAgMBAAE=
 -----END PUBLIC KEY-----`;
-
 // sign jwt
-export function signJWT(payload: object) {
-  return jwt.sign(payload, privateKey, {algorithm: 'RS256'});
+function signJWT(payload) {
+    return jsonwebtoken_1.default.sign(payload, privateKey, { algorithm: 'RS256' });
 }
-
+exports.signJWT = signJWT;
 // verify jwt
-export function verifyJWT(token: string) {
-  try {
-    const decoded = jwt.verify(token, publicKey);
-    return {payload: decoded, expired: false};
-  } catch (error: any) {
-    return {payload: null, expired: error.message.includes('jwt expired')};
-  }
+function verifyJWT(token) {
+    try {
+        const decoded = jsonwebtoken_1.default.verify(token, publicKey);
+        return { payload: decoded, expired: false };
+    }
+    catch (error) {
+        return { payload: null, expired: error.message.includes('jwt expired') };
+    }
 }
-
+exports.verifyJWT = verifyJWT;
 // decode jwt
-export function decodeJWT(token: string) {
-  return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+function decodeJWT(token) {
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
 }
+exports.decodeJWT = decodeJWT;
