@@ -5,6 +5,9 @@ import { SignInUserCommand } from '../../Application/Commands/SignInUserCommand'
 import { SignOutUserCommand } from '../../Application/Commands/SignOutUserCommand';
 import { SignUpUserCommand } from '../../Application/Commands/SignUpUserCommand';
 import { AuthenticateUserQuery } from '../../Application/Queries/AuthenticateUserQuery';
+import * as dotenv from 'dotenv';
+
+dotenv.config({ path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env' });
 
 export class MQTTController {
 
@@ -17,8 +20,8 @@ export class MQTTController {
         port: 8883,
         host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
         protocol: 'mqtts',
-        username: 'gusreinaos',
-        password: 'Mosquitto1204!'
+        username: process.env.USERNAME_MQTT,
+        password: process.env.PASSWORD_MQTT
     }
 
     readonly client = mqtt.connect(this.options);
@@ -69,7 +72,7 @@ export class MQTTController {
                     this.client.publish(this.signOutResponse, String(user))
                 }
 
-                //Request for authorisation of action
+                //Request for authorisation of use case
                 else if (topic === this.appointmentAuthRequest) {
                     const receivedMessage = JSON.parse(message.toString())
                     const userExists = await this.authenticateUserQuery.execute(receivedMessage.jwt)

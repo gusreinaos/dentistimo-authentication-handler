@@ -1,12 +1,10 @@
-'use strict';
-const __importDefault =
-  (this && this.__importDefault) ||
-  function (mod) {
-    return mod && mod.__esModule ? mod : {default: mod};
-  };
-Object.defineProperty(exports, '__esModule', {value: true});
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.decodeJWT = exports.verifyJWT = exports.signJWT = void 0;
-const jsonwebtoken_1 = __importDefault(require('jsonwebtoken'));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const privateKey = `
 -----BEGIN RSA PRIVATE KEY-----
 MIICWwIBAAKBgHgnvr7O2tiApjJfid1orFnIGm6980fZp+Lpbjo+NC/0whMFga2B
@@ -31,21 +29,22 @@ dA4TS2kB9Kf0wn0+7wSlyikHoKhbtzwXHZl17GsyEi6wHnsqNBSauyIWhpha8i+Y
 -----END PUBLIC KEY-----`;
 // sign jwt
 function signJWT(payload) {
-  return jsonwebtoken_1.default.sign(payload, privateKey, {algorithm: 'RS256'});
+    return jsonwebtoken_1.default.sign(payload, privateKey, { algorithm: 'RS256' });
 }
 exports.signJWT = signJWT;
 // verify jwt
 function verifyJWT(token) {
-  try {
-    const decoded = jsonwebtoken_1.default.verify(token, publicKey);
-    return {payload: decoded, expired: false};
-  } catch (error) {
-    return {payload: null, expired: error.message.includes('jwt expired')};
-  }
+    try {
+        const decoded = jsonwebtoken_1.default.verify(token, publicKey);
+        return { payload: decoded, expired: false };
+    }
+    catch (error) {
+        return { payload: null, expired: error.message.includes('jwt expired') };
+    }
 }
 exports.verifyJWT = verifyJWT;
 // decode jwt
 function decodeJWT(token) {
-  return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
 }
 exports.decodeJWT = decodeJWT;

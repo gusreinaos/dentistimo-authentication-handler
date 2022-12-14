@@ -3,7 +3,7 @@ import mongoose, {Schema} from 'mongoose';
 import {IUser} from '../../Domain/Intefaces/IUser';
 
 const userSchema: Schema = new Schema({
-  jwt: {type: String},
+  jwtToken: {type: String, required: true},
   name: {type: String, required: true},
   email: {
     type: String,

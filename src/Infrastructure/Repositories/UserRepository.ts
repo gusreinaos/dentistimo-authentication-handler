@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
 import {User} from '../../Domain/Entities/User';
-import { IUser } from '../../Domain/Intefaces/IUser';
 import {IUserRepository} from '../../Domain/Intefaces/IUserRepository';
 import UserSchema from '../Models/UserSchema';
 
@@ -12,7 +11,7 @@ export class UserRepository implements IUserRepository {
   async getUserByAccessToken(jwt: string): Promise <User | null> {
     return await UserSchema.findOne({jwt: jwt});
   }
-  async createUser(user: IUser): Promise<User | null> {
+  async createUser(user: User): Promise<User | null> {
     return await UserSchema.create(user);
   }
   async updateUser(user: User): Promise <User | null> {

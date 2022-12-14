@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-useless-escape */
 const mongoose_1 = __importStar(require("mongoose"));
 const userSchema = new mongoose_1.Schema({
+    jwtToken: { type: String, required: true },
     name: { type: String, required: true },
     email: {
         type: String,

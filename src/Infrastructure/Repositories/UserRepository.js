@@ -20,6 +20,11 @@ class UserRepository {
             return yield UserSchema_1.default.findOne({ email: email, password: password });
         });
     }
+    getUserByAccessToken(jwt) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield UserSchema_1.default.findOne({ jwt: jwt });
+        });
+    }
     createUser(user) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield UserSchema_1.default.create(user);

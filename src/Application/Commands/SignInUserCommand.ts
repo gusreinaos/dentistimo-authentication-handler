@@ -7,6 +7,7 @@ export class SignInUserCommand {
   constructor(readonly userRepository: UserRepository) {}
 
   async execute(jwt: string): Promise<User | null> {
+
     const payload = decodeJWT(jwt);
 
     const foundUser = this.userRepository.getUser(payload.email, payload.password);
