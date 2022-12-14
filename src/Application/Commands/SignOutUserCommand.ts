@@ -8,10 +8,12 @@ export class SignOutUserCommand {
 
   async execute(jwt: string): Promise<User | null> {
     const payload = decodeJWT(jwt);
+
     const foundUser = this.userRepository.getUser(payload.email, payload.password);
     if (foundUser === null) {
         return null;
     }
+
     const newUser = new User('', payload.name, payload.email, payload.password)
     return this.userRepository.updateUser(newUser);
   }

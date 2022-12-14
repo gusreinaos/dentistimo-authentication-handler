@@ -2,12 +2,16 @@
 /* eslint-disable prettier/prettier */
 import mqtt, { IClientOptions } from 'mqtt'
 import { SignInUserCommand } from '../../Application/Commands/SignInUserCommand';
+import { SignOutUserCommand } from '../../Application/Commands/SignOutUserCommand';
 import { SignUpUserCommand } from '../../Application/Commands/SignUpUserCommand';
+import { AuthenticateUserQuery } from '../../Application/Queries/AuthenticateUserQuery';
 
 export class MQTTController {
 
-    constructor(private signInUserCommand: SignInUserCommand,
-                private signUpUserCommand: SignUpUserCommand){}
+    constructor(readonly signInUserCommand: SignInUserCommand,
+                readonly signUpUserCommand: SignUpUserCommand,
+                readonly signOutUserCommand: SignOutUserCommand,
+                readonly authenticateUserQuery: AuthenticateUserQuery,){}
 
     readonly options: IClientOptions = {
         port: 8883,
@@ -33,6 +37,8 @@ export class MQTTController {
     readonly appointmentAuthRequest = 'authentication/appointment/request'
     readonly appointmentAuthResponse = 'authentication/appointment/response'
 
+    readonly appointmentRequest = 'appointment/request'
+
     appointment = '';
     public connect() {
 
@@ -43,15 +49,40 @@ export class MQTTController {
 
             console.log('Client has subscribed successfully')
 
-            this.client.on('message', (topic, message) => {
-                if (topic === this.signInRequest){
-                    const user = this.signInUserCommand.execute(message.toString())
-                    this.client.publish(this.signInResponse, user.toString())
+            this.client.on('message', async (topic, message) => {
+
+                //Request for signing in
+                if (topic === this.signInRequest) {
+                    const user = await this.signInUserCommand.execute(message.toString())
+                    this.client.publish(this.signInResponse, String(user))
                 }
 
-                else if(topic === this.signUpRequest) {
-                    const user = this.signUpUserCommand.execute(message.toString())
-                    this.client.publish(this.signUpResponse, user.toString())
+                //Request for signing up
+                else if (topic === this.signUpRequest) {
+                    const user = await this.signUpUserCommand.execute(message.toString())
+                    this.client.publish(this.signUpResponse, String(user))
+                }
+
+                //Request for signing out
+                else if (topic === this.signOutRequest) {
+                    const user = await this.signOutUserCommand.execute(message.toString())
+                    this.client.publish(this.signOutResponse, String(user))
+                }
+
+                //Request for authorisation of action
+                else if (topic === this.appointmentAuthRequest) {
+                    const receivedMessage = JSON.parse(message.toString())
+                    const userExists = await this.authenticateUserQuery.execute(receivedMessage.jwt)
+
+                    if (userExists === true) {
+                        const response = delete receivedMessage.jwt;
+                        this.client.publish(this.appointmentRequest, response.toString())
+                        this.client.publish(this.appointmentAuthResponse, userExists.toString())
+                    }
+
+                    else {
+                        this.client.publish(this.appointmentAuthRequest, userExists.toString())
+                    }
                 }
             })
         })
