@@ -5,8 +5,8 @@ import UserSchema from '../Models/UserSchema';
 
 export class UserRepository implements IUserRepository {
 
-  async getUser(email: string, password: string): Promise<User | null> {
-    return await UserSchema.findOne({email: email, password: password});
+  async getUserById(id: string): Promise<User | null> {
+    return await UserSchema.findOne({_id: id});
   }
   async getUserByAccessToken(jwt: string): Promise <User | null> {
     return await UserSchema.findOne({jwt: jwt});

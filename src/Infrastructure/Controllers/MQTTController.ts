@@ -1,10 +1,10 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable prettier/prettier */
-import mqtt, { IClientOptions } from 'mqtt'
-import { SignInUserCommand } from '../../Application/Commands/SignInUserCommand';
-import { SignOutUserCommand } from '../../Application/Commands/SignOutUserCommand';
-import { SignUpUserCommand } from '../../Application/Commands/SignUpUserCommand';
-import { AuthenticateUserQuery } from '../../Application/Queries/AuthenticateUserQuery';
+import mqtt, {IClientOptions} from 'mqtt'
+import {SignInUserCommand} from '../../Application/Commands/SignInUserCommand';
+import {SignOutUserCommand} from '../../Application/Commands/SignOutUserCommand';
+import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
+import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
 import * as dotenv from 'dotenv';
 
 dotenv.config({ path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env' });
@@ -21,7 +21,7 @@ export class MQTTController {
         host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
         protocol: 'mqtts',
         username: process.env.USERNAME_MQTT,
-        password: process.env.PASSWORD_MQTT
+        password: process.env.PASSWORD_MQTT,
     }
 
     readonly client = mqtt.connect(this.options);
