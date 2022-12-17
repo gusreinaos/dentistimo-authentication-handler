@@ -41,7 +41,6 @@ exports.MQTTController = void 0;
 const mqtt_1 = __importDefault(require("mqtt"));
 const dotenv = __importStar(require("dotenv"));
 dotenv.config({ path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env' });
-console.log(process.env.USERNAME_MQTT);
 class MQTTController {
     constructor(signInUserCommand, signUpUserCommand, signOutUserCommand, authenticateUserQuery) {
         this.signInUserCommand = signInUserCommand;
@@ -53,7 +52,7 @@ class MQTTController {
             host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
             protocol: 'mqtts',
             username: process.env.USERNAME_MQTT,
-            password: process.env.PASSWORD_MQTT
+            password: process.env.PASSWORD_MQTT,
         };
         this.client = mqtt_1.default.connect(this.options);
         this.authenticationRequest = 'authentication/#';
