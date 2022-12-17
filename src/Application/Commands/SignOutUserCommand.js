@@ -12,19 +12,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignOutUserCommand = void 0;
 /* eslint-disable prettier/prettier */
 const User_1 = require("../../Domain/Entities/User");
-const JwtUtils_1 = require("../../Domain/Utils/JwtUtils");
+const CryptoUtils_1 = require("../../Domain/Utils/CryptoUtils");
 class SignOutUserCommand {
     constructor(userRepository) {
         this.userRepository = userRepository;
     }
-    execute(jwt) {
+    execute(encryptedMessage) {
         return __awaiter(this, void 0, void 0, function* () {
-            const payload = (0, JwtUtils_1.decodeJWT)(jwt);
-            const foundUser = this.userRepository.getUser(payload.email, payload.password);
+            const payload = (0, CryptoUtils_1.decrypt)(encryptedMessage);
+            const foundUser = this.userRepository.getUserById(payload.id);
             if (foundUser === null) {
                 return null;
             }
-            const newUser = new User_1.User('', payload.name, payload.email, payload.password);
+            const newUser = new User_1.User(String(null), payload.name, payload.email, payload.password);
             return this.userRepository.updateUser(newUser);
         });
     }

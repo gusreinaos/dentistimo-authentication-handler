@@ -16,7 +16,7 @@ class AuthenticateUserQuery {
     }
     execute(jwt) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = this.userRepository.getUserByAccessToken(jwt);
+            const user = yield this.userRepository.getUserByAccessToken(jwt);
             if (user !== null) {
                 return true;
             }

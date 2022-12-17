@@ -12,18 +12,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignInUserCommand = void 0;
 /* eslint-disable prettier/prettier */
 const User_1 = require("../../Domain/Entities/User");
+const CryptoUtils_1 = require("../../Domain/Utils/CryptoUtils");
 const JwtUtils_1 = require("../../Domain/Utils/JwtUtils");
 class SignInUserCommand {
     constructor(userRepository) {
         this.userRepository = userRepository;
     }
-    execute(jwt) {
+    execute(encryptedMessage) {
         return __awaiter(this, void 0, void 0, function* () {
-            const payload = (0, JwtUtils_1.decodeJWT)(jwt);
-            const foundUser = this.userRepository.getUser(payload.email, payload.password);
+            const payload = (0, CryptoUtils_1.decrypt)(encryptedMessage);
+            const foundUser = yield this.userRepository.getUserById(payload.id);
             if (foundUser === null) {
                 return null;
             }
+            //Let user logged in
+            const jwt = (0, JwtUtils_1.signJWT)({ name: foundUser.name, email: foundUser.email, password: foundUser.password });
             const newUser = new User_1.User(jwt, payload.name, payload.email, payload.password);
             return this.userRepository.updateUser(newUser);
         });

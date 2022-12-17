@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserRepository = void 0;
 const UserSchema_1 = __importDefault(require("../Models/UserSchema"));
 class UserRepository {
-    getUser(email, password) {
+    getUserById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield UserSchema_1.default.findOne({ email: email, password: password });
+            return yield UserSchema_1.default.findOne({ _id: id });
         });
     }
     getUserByAccessToken(jwt) {
