@@ -21,14 +21,14 @@ class SignInUserCommand {
     execute(encryptedMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             const payload = (0, CryptoUtils_1.decrypt)(encryptedMessage);
-            const foundUser = yield this.userRepository.getUserById(payload.id);
+            const foundUser = yield this.userRepository.getUserByEmailAndPassword(payload.email, payload.password);
             if (foundUser === null) {
                 return null;
             }
-            //Let user logged in
+            console.log(foundUser);
             const jwt = (0, JwtUtils_1.signJWT)({ name: foundUser.name, email: foundUser.email, password: foundUser.password });
             const newUser = new User_1.User(jwt, payload.name, payload.email, payload.password);
-            return this.userRepository.updateUser(newUser);
+            return this.userRepository.updateUser('123', newUser);
         });
     }
 }

@@ -25,14 +25,19 @@ class UserRepository {
             return yield UserSchema_1.default.findOne({ jwt: jwt });
         });
     }
+    getUserByEmailAndPassword(email, password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield UserSchema_1.default.findOne({ email: email, password: password });
+        });
+    }
     createUser(user) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield UserSchema_1.default.create(user);
         });
     }
-    updateUser(user) {
+    updateUser(id, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield UserSchema_1.default.findOneAndUpdate({ email: user.email }, user);
+            return yield UserSchema_1.default.findOneAndUpdate({ _id: id }, user);
         });
     }
 }

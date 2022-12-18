@@ -82,6 +82,7 @@ class MQTTController {
                 else if (topic === this.signUpRequest) {
                     const user = yield this.signUpUserCommand.execute(message.toString());
                     this.client.publish(this.signUpResponse, String(user));
+                    console.log(user);
                 }
                 //Request for signing out
                 else if (topic === this.signOutRequest) {

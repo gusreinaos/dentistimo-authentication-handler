@@ -11,8 +11,7 @@ const RSA_PRIVATE_KEY = fs.readFileSync(
 
 
 // Encrypt
-
-export function encrypt(text: string) {
+export function encrypt(text: object) {
   const ciphertext = CryptoTS.AES.encrypt(JSON.stringify(text), RSA_PRIVATE_KEY)
   return ciphertext;
 }

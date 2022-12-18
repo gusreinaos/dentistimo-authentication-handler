@@ -20,12 +20,15 @@ class SignOutUserCommand {
     execute(encryptedMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             const payload = (0, CryptoUtils_1.decrypt)(encryptedMessage);
-            const foundUser = this.userRepository.getUserById(payload.id);
+            console.log(payload);
+            const foundUser = yield this.userRepository.getUserById(payload.id);
             if (foundUser === null) {
+                console.log('No user found');
                 return null;
             }
+            console.log(foundUser.name);
             const newUser = new User_1.User(String(null), payload.name, payload.email, payload.password);
-            return this.userRepository.updateUser(newUser);
+            return this.userRepository.updateUser(payload.id, newUser);
         });
     }
 }

@@ -11,10 +11,13 @@ export class UserRepository implements IUserRepository {
   async getUserByAccessToken(jwt: string): Promise <User | null> {
     return await UserSchema.findOne({jwt: jwt});
   }
+  async getUserByEmailAndPassword(email: string, password: string): Promise <User | null>{
+    return await UserSchema.findOne({email: email, password: password})
+  }
   async createUser(user: User): Promise<User | null> {
     return await UserSchema.create(user);
   }
-  async updateUser(user: User): Promise <User | null> {
-    return await UserSchema.findOneAndUpdate({email: user.email}, user);
+  async updateUser(id: string, user: User): Promise <User | null> {
+    return await UserSchema.findOneAndUpdate({_id: id}, user);
   }
 }

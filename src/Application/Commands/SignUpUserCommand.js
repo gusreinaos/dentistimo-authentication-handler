@@ -21,10 +21,8 @@ class SignUpUserCommand {
     execute(encryptedMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             const payload = (0, CryptoUtils_1.decrypt)(encryptedMessage);
-            const parsedMessage = JSON.parse(payload);
             const jwt = (0, JwtUtils_1.signJWT)(payload);
-            const user = new User_1.User(jwt, parsedMessage.name, parsedMessage.email, parsedMessage.password);
-            console.log(user);
+            const user = new User_1.User(jwt, payload.name, payload.email, payload.password);
             return yield this.userRepository.createUser(user);
         });
     }

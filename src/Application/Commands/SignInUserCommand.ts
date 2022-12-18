@@ -11,15 +11,18 @@ export class SignInUserCommand {
 
     const payload = decrypt(encryptedMessage);
 
-    const foundUser = await this.userRepository.getUserById(payload.id);
+    const foundUser = await this.userRepository.getUserByEmailAndPassword(payload.email, payload.password);
+
     if (foundUser === null) {
         return null;
     }
 
-    //Let user logged in
+    console.log(foundUser)
+
     const jwt = signJWT({name: foundUser.name, email: foundUser.email, password: foundUser.password})
 
     const newUser = new User(jwt, payload.name, payload.email, payload.password)
-    return this.userRepository.updateUser(newUser);
+
+    return this.userRepository.updateUser('123', newUser);
   }
 }

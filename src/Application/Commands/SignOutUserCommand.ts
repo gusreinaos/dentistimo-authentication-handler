@@ -7,14 +7,21 @@ export class SignOutUserCommand {
   constructor(readonly userRepository: UserRepository) {}
 
   async execute(encryptedMessage: string): Promise<User | null> {
+
     const payload = decrypt(encryptedMessage);
 
-    const foundUser = this.userRepository.getUserById(payload.id);
+    console.log(payload)
+
+    const foundUser = await this.userRepository.getUserById(payload.id);
+
     if (foundUser === null) {
-        return null;
+      console.log('No user found');
+      return null;
     }
 
+    console.log(foundUser.name)
+
     const newUser = new User(String(null), payload.name, payload.email, payload.password)
-    return this.userRepository.updateUser(newUser);
+    return this.userRepository.updateUser(payload.id, newUser);
   }
 }

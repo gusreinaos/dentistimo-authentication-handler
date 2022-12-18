@@ -11,12 +11,10 @@ export class SignUpUserCommand {
 
     const payload = decrypt(encryptedMessage);
 
-    const parsedMessage = JSON.parse(payload)
-
     const jwt = signJWT(payload)
 
-    const user = new User(jwt, parsedMessage.name, parsedMessage.email, parsedMessage.password);
-    console.log(user)
+    const user = new User(jwt, payload.name, payload.email, payload.password);
+
     return await this.userRepository.createUser(user);
   }
 }
