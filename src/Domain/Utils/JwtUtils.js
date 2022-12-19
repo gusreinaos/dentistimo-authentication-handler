@@ -1,41 +1,53 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.decodeJWT = exports.verifyJWT = exports.signJWT = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const privateKey = `
------BEGIN RSA PRIVATE KEY-----
-MIICWwIBAAKBgHgnvr7O2tiApjJfid1orFnIGm6980fZp+Lpbjo+NC/0whMFga2B
-iw5b1G2Q/B2u0tpO1Fs/E8z7Lv1nYfr5jx2S8x6BdA4TS2kB9Kf0wn0+7wSlyikH
-oKhbtzwXHZl17GsyEi6wHnsqNBSauyIWhpha8i+Y+3GyaOY536H47qyXAgMBAAEC
-gYAOphnVPXbk6lpYzdkLC1Xn5EOEuNfOLLURLxBnPWozZo26r/Mtahu/9mYhrYlv
-PP8r6mxta3VIil8iOdZyOLa/4d1LPd+UehgEXIJEiYXLtn7RS5eUnoPuQxssfs1k
-OWjdN8p6SzppleegFTvGRX4KM3cDLfSphOk8JuBCrpSSYQJBAOdqizTSrdKMTuVe
-c7Jk1JOJkyFuFs+N5zeryyeFGH7IpRdWy0rkWMxIUAi8Ap1vYVBPHv4tDOo3sy5X
-VLc/knkCQQCE62pg+0TmsrhO/2Pgog6MLBkzlzXYMRp/01HbmznwYF+ejfPnzLkz
-hnUlxRUNK3lhXM/7H6oAjvqF2R72u/OPAkEAterkmdbQfEZ+MwNoEiH/lie9OLdx
-SSI1VGdBYcTYN7qFRW6eizYstBJYkDU0HQ0Uw+we4hMKJwk4W0KdvxxDiQJAeqlB
-V1QqBneBbK10PzVuFV8QtrJhJyxRVwrtbKq38iMNuqUnI4+ijXEUpJFWVvv6nKXo
-7McQvEk12dU/JNTX8wJAOlAtSNjp9tVwpMpC0w2St1eKc1L2SknjeohA5ldoBz8s
-GeZsPhTU3eHSD1neAZXLKN5K68z3zFBr20ubY9nyLw==
------END RSA PRIVATE KEY-----`;
-const publicKey = `-----BEGIN PUBLIC KEY-----
-MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHgnvr7O2tiApjJfid1orFnIGm69
-80fZp+Lpbjo+NC/0whMFga2Biw5b1G2Q/B2u0tpO1Fs/E8z7Lv1nYfr5jx2S8x6B
-dA4TS2kB9Kf0wn0+7wSlyikHoKhbtzwXHZl17GsyEi6wHnsqNBSauyIWhpha8i+Y
-+3GyaOY536H47qyXAgMBAAE=
------END PUBLIC KEY-----`;
-// sign jwt
+const fs = require('fs');
+const dotenv = __importStar(require("dotenv"));
+dotenv.config({
+    path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env',
+});
+const RSA_PRIVATE_KEY = {
+    key: fs.readFileSync('/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/jwtRS256.key'),
+    passphrase: String(process.env.PASSWORD_MQTT),
+};
+// Sign jwt
 function signJWT(payload) {
-    return jsonwebtoken_1.default.sign(payload, privateKey, { algorithm: 'RS256' });
+    return jsonwebtoken_1.default.sign(payload, RSA_PRIVATE_KEY, {
+        algorithm: 'RS256',
+    });
 }
 exports.signJWT = signJWT;
 // verify jwt
 function verifyJWT(token) {
     try {
-        const decoded = jsonwebtoken_1.default.verify(token, publicKey);
+        const decoded = jsonwebtoken_1.default.verify(token, '1234');
         return { payload: decoded, expired: false };
     }
     catch (error) {
@@ -43,7 +55,7 @@ function verifyJWT(token) {
     }
 }
 exports.verifyJWT = verifyJWT;
-// decode jwt
+// Decode jwt
 function decodeJWT(token) {
     return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
 }
