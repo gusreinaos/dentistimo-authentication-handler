@@ -35,9 +35,14 @@ class UserRepository {
             return yield UserSchema_1.default.create(user);
         });
     }
-    updateUser(id, user) {
+    updateUserById(id, user) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield UserSchema_1.default.findOneAndUpdate({ _id: id }, user);
+        });
+    }
+    updateUserByEmail(email, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield UserSchema_1.default.findOneAndUpdate({ email: email }, user);
         });
     }
 }

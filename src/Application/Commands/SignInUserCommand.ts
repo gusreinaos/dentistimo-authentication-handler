@@ -23,6 +23,6 @@ export class SignInUserCommand {
 
     const newUser = new User(jwt, payload.name, payload.email, payload.password)
 
-    return this.userRepository.updateUser('123', newUser);
+    return this.userRepository.updateUserByEmail(foundUser.email, newUser);
   }
 }

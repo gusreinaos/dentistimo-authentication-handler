@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignUpUserCommand = void 0;
-/* eslint-disable prettier/prettier */
 const User_1 = require("../../Domain/Entities/User");
 const CryptoUtils_1 = require("../../Domain/Utils/CryptoUtils");
 const JwtUtils_1 = require("../../Domain/Utils/JwtUtils");

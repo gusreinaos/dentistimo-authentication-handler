@@ -17,7 +17,10 @@ export class UserRepository implements IUserRepository {
   async createUser(user: User): Promise<User | null> {
     return await UserSchema.create(user);
   }
-  async updateUser(id: string, user: User): Promise <User | null> {
+  async updateUserById(id: string, user: User): Promise <User | null> {
     return await UserSchema.findOneAndUpdate({_id: id}, user);
+  }
+  async updateUserByEmail(email: string, user: User): Promise <User | null> {
+    return await UserSchema.findOneAndUpdate({email: email}, user)
   }
 }

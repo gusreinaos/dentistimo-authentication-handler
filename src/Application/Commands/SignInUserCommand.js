@@ -28,7 +28,7 @@ class SignInUserCommand {
             console.log(foundUser);
             const jwt = (0, JwtUtils_1.signJWT)({ name: foundUser.name, email: foundUser.email, password: foundUser.password });
             const newUser = new User_1.User(jwt, payload.name, payload.email, payload.password);
-            return this.userRepository.updateUser('123', newUser);
+            return this.userRepository.updateUserByEmail(foundUser.email, newUser);
         });
     }
 }
