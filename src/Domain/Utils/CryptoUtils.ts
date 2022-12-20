@@ -18,3 +18,5 @@ export function decrypt(encryptedMessage: string){
   return finalMessage;
 }
 
+console.log('test')
+
