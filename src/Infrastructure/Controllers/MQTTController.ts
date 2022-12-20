@@ -42,7 +42,6 @@ export class MQTTController {
 
     readonly appointmentRequest = 'appointment/request'
 
-    appointment = '';
     public connect() {
 
         this.client.on('connect', () => {
