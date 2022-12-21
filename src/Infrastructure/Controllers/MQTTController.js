@@ -65,7 +65,6 @@ class MQTTController {
         this.appointmentAuthRequest = 'authentication/appointment/request';
         this.appointmentAuthResponse = 'authentication/appointment/response';
         this.appointmentRequest = 'appointment/request';
-        this.appointment = '';
     }
     connect() {
         this.client.on('connect', () => {
@@ -76,12 +75,12 @@ class MQTTController {
                 //Request for signing in
                 if (topic === this.signInRequest) {
                     const user = yield this.signInUserCommand.execute(message.toString());
-                    this.client.publish(this.signInResponse, String(user));
+                    this.client.publish(this.signInResponse, JSON.stringify(user));
                 }
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
                     const user = yield this.signUpUserCommand.execute(message.toString());
-                    this.client.publish(this.signUpResponse, String(user));
+                    this.client.publish(this.signUpResponse, JSON.stringify(user));
                     console.log(user);
                 }
                 //Request for signing out
