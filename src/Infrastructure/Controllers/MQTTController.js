@@ -39,6 +39,7 @@ exports.MQTTController = void 0;
 /* eslint-disable no-case-declarations */
 /* eslint-disable prettier/prettier */
 const mqtt_1 = __importDefault(require("mqtt"));
+const opossum_1 = __importDefault(require("opossum"));
 const dotenv = __importStar(require("dotenv"));
 dotenv.config({ path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env' });
 class MQTTController {
@@ -53,6 +54,11 @@ class MQTTController {
             protocol: 'mqtts',
             username: process.env.USERNAME_MQTT,
             password: process.env.PASSWORD_MQTT,
+        };
+        this.circuitBreakerOptions = {
+            timeout: 500,
+            errorThresholdPercentage: 50,
+            resetTimeout: 5000
         };
         this.client = mqtt_1.default.connect(this.options);
         this.authenticationRequest = 'authentication/#';
@@ -74,7 +80,16 @@ class MQTTController {
             this.client.on('message', (topic, message) => __awaiter(this, void 0, void 0, function* () {
                 //Request for signing in
                 if (topic === this.signInRequest) {
-                    const user = yield this.signInUserCommand.execute(message.toString());
+                    const signInBreaker = new opossum_1.default(this.signInUserCommand.execute, this.circuitBreakerOptions);
+                    const user = yield signInBreaker.fire(message.toString());
+                    console.log(user);
+                    signInBreaker.fallback(() => { console.log('Service currently unavailable'); });
+                    signInBreaker.on('success', () => {
+                        'Circuit breaker activated';
+                    });
+                    signInBreaker.on('failure', () => {
+                        'Circuit breaker failed';
+                    });
                     this.client.publish(this.signInResponse, JSON.stringify(user));
                 }
                 //Request for signing up
@@ -86,7 +101,7 @@ class MQTTController {
                 //Request for signing out
                 else if (topic === this.signOutRequest) {
                     const user = yield this.signOutUserCommand.execute(message.toString());
-                    this.client.publish(this.signOutResponse, String(user));
+                    this.client.publish(this.signOutResponse, JSON.stringify(user));
                 }
                 //Request for authorisation of use case
                 else if (topic === this.appointmentAuthRequest) {

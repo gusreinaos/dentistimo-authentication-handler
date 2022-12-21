@@ -5,6 +5,9 @@ import {SignInUserCommand} from '../../Application/Commands/SignInUserCommand';
 import {SignOutUserCommand} from '../../Application/Commands/SignOutUserCommand';
 import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
 import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
+
+import CircuitBreaker from 'opossum';
+
 import * as dotenv from 'dotenv';
 
 dotenv.config({ path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env' });
@@ -23,6 +26,12 @@ export class MQTTController {
         username: process.env.USERNAME_MQTT,
         password: process.env.PASSWORD_MQTT,
     }
+
+    readonly circuitBreakerOptions = {
+        timeout: 500,
+        errorThresholdPercentage: 50,
+        resetTimeout: 5000
+      };
 
     readonly client = mqtt.connect(this.options);
 
@@ -55,8 +64,16 @@ export class MQTTController {
 
                 //Request for signing in
                 if (topic === this.signInRequest) {
-                    const user = await this.signInUserCommand.execute(message.toString())
+
+                    const signInBreaker = new CircuitBreaker(this.signInUserCommand.execute, this.circuitBreakerOptions);
+                    const user = await signInBreaker.fire(message.toString())
+
+                    signInBreaker.fallback(() => {console.log('Service currently unavailable')})
+                    signInBreaker.on('success', () => {'Circuit breaker activated'})
+                    signInBreaker.on('failure', () => {'Circuit breaker failed'})
+
                     this.client.publish(this.signInResponse, JSON.stringify(user))
+
                 }
 
                 //Request for signing up
