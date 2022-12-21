@@ -56,20 +56,20 @@ export class MQTTController {
                 //Request for signing in
                 if (topic === this.signInRequest) {
                     const user = await this.signInUserCommand.execute(message.toString())
-                    this.client.publish(this.signInResponse, String(user))
+                    this.client.publish(this.signInResponse, JSON.stringify(user))
                 }
 
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
                     const user = await this.signUpUserCommand.execute(message.toString())
-                    this.client.publish(this.signUpResponse, String(user))
+                    this.client.publish(this.signUpResponse, JSON.stringify(user))
                     console.log(user)
                 }
 
                 //Request for signing out
                 else if (topic === this.signOutRequest) {
                     const user = await this.signOutUserCommand.execute(message.toString())
-                    this.client.publish(this.signOutResponse, String(user))
+                    this.client.publish(this.signOutResponse, JSON.stringify(user))
                 }
 
                 //Request for authorisation of use case
