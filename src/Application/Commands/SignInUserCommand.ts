@@ -11,7 +11,7 @@ export class SignInUserCommand {
 
     const payload = decrypt(encryptedMessage);
 
-    const foundUser = await this.userRepository.getUserByEmailAndPassword(payload.email, payload.password);
+    const foundUser : User | null = await this.userRepository.getUserByEmailAndPassword(payload.email, payload.password);
 
     if (foundUser === null) {
         return null;

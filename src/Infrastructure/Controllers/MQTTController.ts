@@ -6,7 +6,8 @@ import {SignOutUserCommand} from '../../Application/Commands/SignOutUserCommand'
 import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
 import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
 
-import CircuitBreaker from 'opossum';
+import CircuitBreaker = require('opossum')
+import TimeoutError = require('opossum')
 
 import * as dotenv from 'dotenv';
 
@@ -64,15 +65,37 @@ export class MQTTController {
 
                 //Request for signing in
                 if (topic === this.signInRequest) {
+                    
+                    const signInBreaker = new CircuitBreaker((encryptedMessage: string) => {
+                        return this.signInUserCommand.execute(encryptedMessage);
+                      }, this.circuitBreakerOptions)
 
-                    const signInBreaker = new CircuitBreaker(this.signInUserCommand.execute, this.circuitBreakerOptions);
+                      
+                      try {
+                        const result = await signInBreaker.fire(message.toString())
+                        console.log(result)
+                        this.client.publish(this.signInResponse, JSON.stringify(result))
+                      } catch (error) {
+                        if(error instanceof TimeoutError) {
+                            console.log('The function timed out')
+                        }
+                        else {
+                            signInBreaker.on('success', () => {'Circuit breaker activated'})
+                            signInBreaker.on('failure', () => {'Circuit breaker failed'})
+                            signInBreaker.fallback(() => JSON.stringify({message: 'this service is currently unavailable'}))
+                            console.error(error);
+                        }
+                      }
+                      
+                    /*const signInBreaker = new CircuitBreaker(this.signInUserCommand.execute, this.circuitBreakerOptions);
                     const user = await signInBreaker.fire(message.toString())
 
                     signInBreaker.fallback(() => {console.log('Service currently unavailable')})
                     signInBreaker.on('success', () => {'Circuit breaker activated'})
                     signInBreaker.on('failure', () => {'Circuit breaker failed'})
+                    */
 
-                    this.client.publish(this.signInResponse, JSON.stringify(user))
+                   
 
                 }
 
