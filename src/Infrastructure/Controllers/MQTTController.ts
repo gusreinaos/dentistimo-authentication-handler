@@ -24,12 +24,12 @@ export class MQTTController {
         port: 8883,
         host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
         protocol: 'mqtts',
-        username: process.env.USERNAME_MQTT,
-        password: process.env.PASSWORD_MQTT,
+        username: 'gusreinaos',
+        password: 'Mosquitto1204!'
     }
 
     readonly circuitBreakerOptions = {
-        timeout: 10,
+        timeout: 1000,
         errorThresholdPercentage: 50,
         resetTimeout: 5000
       };
@@ -70,33 +70,23 @@ export class MQTTController {
                         return this.signInUserCommand.execute(encryptedMessage);
                       }, this.circuitBreakerOptions)
 
-                      try {
+                    try {
+                        signInBreaker.fallback(() => {
+                            console.log('System is down')
+                        });
                         const result = await signInBreaker.fire(message.toString())
-                        console.log(result)
-                        this.client.publish(this.signInResponse, JSON.stringify(result))
+
+                        if (signInBreaker.stats.fallbacks > 0) {
+                            this.client.publish(this.signInResponse, 'Error')
+                        }
+                        else {
+                            this.client.publish(this.signInResponse, JSON.stringify(result))
+                        }
                       }
 
-                      catch (error) {
+                    catch (error) {
                         console.log(error)
-                      }
-
-                      signInBreaker.fallback((error: any) => {
-                        // Return a fallback value or throw an error
-                        return 'Sorry, we are experiencing technical difficulties';
-                      });
-
-                      signInBreaker.on('open', () => {
-                        console.log('Circuit is open');
-                      });
-
-                      signInBreaker.on('halfOpen', () => {
-                        console.log('Circuit is half open');
-                      });
-
-                      signInBreaker.on('close', () => {
-                        console.log('Circuit is closed');
-                      });
-
+                    }
                 }
 
                 //Request for signing up

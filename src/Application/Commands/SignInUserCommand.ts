@@ -17,8 +17,6 @@ export class SignInUserCommand {
         return null;
     }
 
-    console.log(foundUser)
-
     const jwt = signJWT({name: foundUser.name, email: foundUser.email, password: foundUser.password})
 
     const newUser = new User(jwt, payload.name, payload.email, payload.password)
