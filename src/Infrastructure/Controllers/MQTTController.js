@@ -50,10 +50,10 @@ class MQTTController {
         this.authenticateUserQuery = authenticateUserQuery;
         this.options = {
             port: 8883,
-            host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
+            host: 'e960f016875b4c75857353c7f267d899.s2.eu.hivemq.cloud',
             protocol: 'mqtts',
-            username: 'gusreinaos',
-            password: 'Mosquitto1204!'
+            username: 'gusasarkw@student.gu.se',
+            password: 'Twumasi123.'
         };
         this.circuitBreakerOptions = {
             timeout: 1000,
@@ -89,7 +89,7 @@ class MQTTController {
                         });
                         const result = yield signInBreaker.fire(message.toString());
                         if (signInBreaker.stats.fallbacks > 0) {
-                            this.client.publish(this.signInResponse, 'Error');
+                            this.client.publish(this.signInResponse, JSON.stringify({ message: 'We are experiencing some difficulties' }));
                         }
                         else {
                             this.client.publish(this.signInResponse, JSON.stringify(result));
@@ -101,9 +101,20 @@ class MQTTController {
                 }
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
-                    const user = yield this.signUpUserCommand.execute(message.toString());
-                    this.client.publish(this.signUpResponse, JSON.stringify(user));
-                    console.log(user);
+                    const signUpBreaker = new CircuitBreaker((encryptedMessage) => {
+                        return this.signUpUserCommand.execute(encryptedMessage);
+                    }, this.circuitBreakerOptions);
+                    signUpBreaker.fallback(() => {
+                        console.log('System is down');
+                    });
+                    const result = yield signUpBreaker.fire(message.toString());
+                    console.log(result);
+                    if (signUpBreaker.stats.fallbacks > 0) {
+                        this.client.publish(this.signInResponse, JSON.stringify({ message: 'We are experiencing some difficulties' }));
+                    }
+                    else {
+                        this.client.publish(this.signInResponse, JSON.stringify(result));
+                    }
                 }
                 //Request for signing out
                 else if (topic === this.signOutRequest) {
