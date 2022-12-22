@@ -29,7 +29,7 @@ export class MQTTController {
     }
 
     readonly circuitBreakerOptions = {
-        timeout: 500,
+        timeout: 10,
         errorThresholdPercentage: 50,
         resetTimeout: 5000
       };
@@ -65,37 +65,37 @@ export class MQTTController {
 
                 //Request for signing in
                 if (topic === this.signInRequest) {
-                    
+
                     const signInBreaker = new CircuitBreaker((encryptedMessage: string) => {
                         return this.signInUserCommand.execute(encryptedMessage);
                       }, this.circuitBreakerOptions)
 
-                      
                       try {
                         const result = await signInBreaker.fire(message.toString())
                         console.log(result)
                         this.client.publish(this.signInResponse, JSON.stringify(result))
-                      } catch (error) {
-                        if(error instanceof TimeoutError) {
-                            console.log('The function timed out')
-                        }
-                        else {
-                            signInBreaker.on('success', () => {'Circuit breaker activated'})
-                            signInBreaker.on('failure', () => {'Circuit breaker failed'})
-                            signInBreaker.fallback(() => JSON.stringify({message: 'this service is currently unavailable'}))
-                            console.error(error);
-                        }
                       }
-                      
-                    /*const signInBreaker = new CircuitBreaker(this.signInUserCommand.execute, this.circuitBreakerOptions);
-                    const user = await signInBreaker.fire(message.toString())
 
-                    signInBreaker.fallback(() => {console.log('Service currently unavailable')})
-                    signInBreaker.on('success', () => {'Circuit breaker activated'})
-                    signInBreaker.on('failure', () => {'Circuit breaker failed'})
-                    */
+                      catch (error) {
+                        console.log(error)
+                      }
 
-                   
+                      signInBreaker.fallback((error: any) => {
+                        // Return a fallback value or throw an error
+                        return 'Sorry, we are experiencing technical difficulties';
+                      });
+
+                      signInBreaker.on('open', () => {
+                        console.log('Circuit is open');
+                      });
+
+                      signInBreaker.on('halfOpen', () => {
+                        console.log('Circuit is half open');
+                      });
+
+                      signInBreaker.on('close', () => {
+                        console.log('Circuit is closed');
+                      });
 
                 }
 
