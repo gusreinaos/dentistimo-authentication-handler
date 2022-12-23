@@ -7,7 +7,6 @@ import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
 import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
 
 import CircuitBreaker = require('opossum')
-import TimeoutError = require('opossum')
 
 import * as dotenv from 'dotenv';
 
@@ -71,13 +70,15 @@ export class MQTTController {
                       }, this.circuitBreakerOptions)
 
                     try {
+
                         signInBreaker.fallback(() => {
                             console.log('System is down')
                         });
+
                         const result = await signInBreaker.fire(message.toString())
 
                         if (signInBreaker.stats.fallbacks > 0) {
-                            this.client.publish(this.signInResponse, JSON.stringify({message:'We are experiencing some difficulties'}))
+                            this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
                         }
                         else {
                             this.client.publish(this.signInResponse, JSON.stringify(result))
@@ -91,21 +92,23 @@ export class MQTTController {
 
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
-                   
+
                     const signUpBreaker = new CircuitBreaker((encryptedMessage: string) => {
                         return this.signUpUserCommand.execute(encryptedMessage);
                       }, this.circuitBreakerOptions)
 
                     try {
+
                         signUpBreaker.fallback(() => {
                             console.log('System is down')
                         });
+
                         const result = await signUpBreaker.fire(message.toString())
-                        console.log(result)
+
                         if (signUpBreaker.stats.fallbacks > 0) {
-                            this.client.publish(this.signInResponse, JSON.stringify({message:'We are experiencing some difficulties'}))
-                           
+                            this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
                         }
+
                         else {
                             this.client.publish(this.signInResponse, JSON.stringify(result))
                         }
@@ -114,28 +117,73 @@ export class MQTTController {
                     catch (error) {
                         console.log(error)
                     }
-
                 }
 
                 //Request for signing out
                 else if (topic === this.signOutRequest) {
-                    const user = await this.signOutUserCommand.execute(message.toString())
-                    this.client.publish(this.signOutResponse, JSON.stringify(user))
+
+                    const signOutBreaker = new CircuitBreaker((encryptedMessage: string) => {
+                        return this.signOutUserCommand.execute(encryptedMessage);
+                      }, this.circuitBreakerOptions)
+
+                    try {
+
+                        signOutBreaker.fallback(() => {
+                            console.log('System is down')
+                        });
+
+                        const result = await signOutBreaker.fire(message.toString())
+
+                        if (signOutBreaker.stats.fallbacks > 0) {
+                            this.client.publish(this.signOutResponse, JSON.stringify({message:'CircuitBreaker activated'}))
+                        }
+
+                        else {
+                            this.client.publish(this.signOutResponse, JSON.stringify(result))
+                        }
+                      }
+
+                    catch (error) {
+                        console.log(error)
+                    }
                 }
 
                 //Request for authorisation of use case
                 else if (topic === this.appointmentAuthRequest) {
-                    const receivedMessage = JSON.parse(message.toString())
-                    const userExists = await this.authenticateUserQuery.execute(receivedMessage.jwt)
 
-                    if (userExists === true) {
-                        const response = delete receivedMessage.jwt;
-                        this.client.publish(this.appointmentRequest, response.toString())
-                        this.client.publish(this.appointmentAuthResponse, userExists.toString())
-                    }
+                    const authenticateUserBreaker = new CircuitBreaker((encryptedMessage: string) => {
+                        return this.authenticateUserQuery.execute(encryptedMessage);
+                      }, this.circuitBreakerOptions)
 
-                    else {
-                        this.client.publish(this.appointmentAuthRequest, userExists.toString())
+                    try {
+
+                        authenticateUserBreaker.fallback(() => {
+                            console.log('System is down')
+                        });
+
+                        const receivedMessage = JSON.parse(message.toString())
+                        const userExists = await this.authenticateUserQuery.execute(receivedMessage.jwt)
+
+                        if (authenticateUserBreaker.stats.fallbacks > 0) {
+                            this.client.publish(this.signOutResponse, JSON.stringify({message:'CircuitBreaker activated'}))
+                        }
+
+                        else {
+
+                            if (userExists === true) {
+                                const response = delete receivedMessage.jwt;
+                                this.client.publish(this.appointmentRequest, response.toString())
+                                this.client.publish(this.appointmentAuthResponse, userExists.toString())
+                            }
+
+                            else {
+                                this.client.publish(this.appointmentAuthRequest, userExists.toString())
+                            }
+                        }
+                      }
+
+                    catch (error) {
+                        console.log(error)
                     }
                 }
             })
