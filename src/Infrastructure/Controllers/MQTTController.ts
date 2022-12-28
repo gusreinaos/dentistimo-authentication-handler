@@ -7,7 +7,7 @@ import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
 import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
 import * as dotenv from 'dotenv';
 
-dotenv.config({ path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env' });
+dotenv.config({ path: '../../../.env' });
 
 export class MQTTController {
 
@@ -18,7 +18,7 @@ export class MQTTController {
 
     readonly options: IClientOptions = {
         port: 8883,
-        host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
+        host: 'cb9fe4f292fe4099ae5eeb9f230c8346.s2.eu.hivemq.cloud',
         protocol: 'mqtts',
         username: process.env.USERNAME_MQTT,
         password: process.env.PASSWORD_MQTT,
