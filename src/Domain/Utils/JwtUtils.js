@@ -27,15 +27,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.decodeJWT = exports.verifyJWT = exports.signJWT = void 0;
+/* eslint-disable prettier/prettier */
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const fs = require('fs');
 const dotenv = __importStar(require("dotenv"));
 dotenv.config({
-    path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env',
+    path: '../../../.env',
 });
 const RSA_PRIVATE_KEY = {
-    key: fs.readFileSync('/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/jwtRS256.key'),
-    passphrase: String(process.env.PASSWORD_MQTT),
+    key: fs.readFileSync('../../../jwtRS256.key'),
+    passphrase: String(process.env.PASSWORD_JWT),
 };
 // Sign jwt
 function signJWT(payload) {
