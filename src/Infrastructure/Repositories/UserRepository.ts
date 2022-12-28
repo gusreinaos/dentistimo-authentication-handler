@@ -11,6 +11,9 @@ export class UserRepository implements IUserRepository {
   async getUserByAccessToken(jwt: string): Promise <User | null> {
     return await UserSchema.findOne({jwt: jwt});
   }
+  async getUserByEmail(email: string): Promise <User | null> {
+    return await UserSchema.findOne({email: email});
+  }
   async getUserByEmailAndPassword(email: string, password: string): Promise <User | null>{
     return await UserSchema.findOne({email: email, password: password})
   }
