@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-import {v4 as uuidv4} from 'uuid';
 import {User} from '../../Domain/Entities/User';
 import {decrypt} from '../../Domain/Utils/CryptoUtils';
 import {signJWT} from '../../Domain/Utils/JwtUtils';
