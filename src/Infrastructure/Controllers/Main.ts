@@ -6,6 +6,7 @@ import {SignInUserCommand} from '../../Application/Commands/SignInUserCommand';
 import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
 import {SignOutUserCommand} from '../../Application/Commands/SignOutUserCommand';
 import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
+import { GetUserInformationQuery } from '../../Application/Queries/GetUserInformationQuery';
 
 mongoose.connect(
   'mongodb+srv://gusreinaos:4MNbebz6E04hq5IV@cluster0.x1srwma.mongodb.net/test'
@@ -16,5 +17,6 @@ const signInUserCommand = new SignInUserCommand(repository);
 const signUpUserCommand = new SignUpUserCommand(repository);
 const signOutUserCommand = new SignOutUserCommand(repository);
 const authenticateUserQuery = new AuthenticateUserQuery(repository);
+const getUserInformationQuery = new GetUserInformationQuery(repository)
 
-new MQTTController(signInUserCommand, signUpUserCommand, signOutUserCommand, authenticateUserQuery).connect();
+new MQTTController(signInUserCommand, signUpUserCommand, signOutUserCommand, authenticateUserQuery, getUserInformationQuery).connect();
