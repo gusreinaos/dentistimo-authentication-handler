@@ -8,39 +8,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignInUserCommand = void 0;
 /* eslint-disable prettier/prettier */
 const User_1 = require("../../Domain/Entities/User");
+const ErrorResponse_1 = require("../../Domain/Responses/FlowResponse/ErrorResponse");
+const ProcessResponse_1 = require("../../Domain/Responses/FlowResponse/ProcessResponse");
 const CryptoUtils_1 = require("../../Domain/Utils/CryptoUtils");
 const JwtUtils_1 = require("../../Domain/Utils/JwtUtils");
-const opossum_1 = __importDefault(require("opossum"));
+const UserNotFoundError_1 = require("../../Domain/Types/Errors/UserNotFoundError");
+const UserAlreadySignedInError_1 = require("../../Domain/Types/Errors/UserAlreadySignedInError");
 class SignInUserCommand {
-    constructor(userRepository) {
+    constructor(userRepository, validateUserService, validateUserTokenService) {
         this.userRepository = userRepository;
-        this.circuitBreakerOptions = {
-            timeout: 3000,
-            errorThresholdPercentage: 50,
-            resetTimeout: 30000 // After 30 seconds, try again.
-        };
-        this.loginBreaker = new opossum_1.default(this.execute, this.circuitBreakerOptions);
-        this.response = this.loginBreaker.fallback(() => JSON.stringify({ message: "this service is currenly unavailable" }));
-        this.failure = this.loginBreaker.on("failure", () => console.log('login failed'));
+        this.validateUserService = validateUserService;
+        this.validateUserTokenService = validateUserTokenService;
     }
     execute(encryptedMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             const payload = (0, CryptoUtils_1.decrypt)(encryptedMessage);
-            const foundUser = yield this.userRepository.getUserByEmailAndPassword(payload.email, payload.password);
-            if (foundUser === null) {
-                return null;
+            //Validate if user with the email exists
+            const userExists = yield this.validateUserService.validateEmail(payload.email);
+            if (!userExists) {
+                return ProcessResponse_1.ProcessResponse.Error(new ErrorResponse_1.ErrorResponse(UserNotFoundError_1.UserNotFoundError.code, UserNotFoundError_1.UserNotFoundError.detail));
             }
-            console.log(foundUser);
+            //Validate if user token is already null
+            const tokenExists = yield this.validateUserTokenService.validateEmail(payload.email);
+            if (tokenExists) {
+                return ProcessResponse_1.ProcessResponse.Error(new ErrorResponse_1.ErrorResponse(UserAlreadySignedInError_1.UserAlreadySignedInError.code, UserAlreadySignedInError_1.UserAlreadySignedInError.detail));
+            }
+            const foundUser = yield this.userRepository.getUserByEmailAndPassword(payload.email, payload.password);
             const jwt = (0, JwtUtils_1.signJWT)({ name: foundUser.name, email: foundUser.email, password: foundUser.password });
             const newUser = new User_1.User(jwt, payload.name, payload.email, payload.password);
-            return this.userRepository.updateUserByEmail(foundUser.email, newUser);
+            const user = yield this.userRepository.updateUserByEmail(foundUser.email, newUser);
+            return ProcessResponse_1.ProcessResponse.Success(user);
         });
     }
 }

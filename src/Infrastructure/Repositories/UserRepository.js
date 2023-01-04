@@ -25,6 +25,11 @@ class UserRepository {
             return yield UserSchema_1.default.findOne({ jwt: jwt });
         });
     }
+    getUserByEmail(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield UserSchema_1.default.findOne({ email: email });
+        });
+    }
     getUserByEmailAndPassword(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield UserSchema_1.default.findOne({ email: email, password: password });
