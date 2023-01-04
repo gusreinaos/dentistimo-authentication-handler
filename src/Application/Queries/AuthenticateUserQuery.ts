@@ -17,12 +17,13 @@ export class AuthenticateUserQuery {
 
     const message = JSON.parse(payload)
 
-    const userExists = await this.validateUserService.validateId(message.id)
+    const userExists = await this.validateUserService.validateId(message.userId)
     if(!userExists) {
       return ProcessResponse.Error(new ErrorResponse(UserNotFoundError.code, UserNotFoundError.detail))
     }
 
-    const tokenExists = await this.validateUserTokenService.validateId(message.id)
+
+    const tokenExists = await this.validateUserTokenService.validateId(message.userId)
     if(!tokenExists) {
       return ProcessResponse.Error(new ErrorResponse(UserNotAuthenticatedError.code, UserNotAuthenticatedError.detail))
     }
