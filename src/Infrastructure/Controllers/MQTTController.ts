@@ -6,7 +6,6 @@ import {SignOutUserCommand} from '../../Application/Commands/SignOutUserCommand'
 import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
 import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
 import * as dotenv from 'dotenv';
-import { GetUserInformationQuery } from '../../Application/Queries/GetUserInformationQuery';
 
 dotenv.config({ path: '../../../.env' });
 
@@ -15,8 +14,7 @@ export class MQTTController {
     constructor(readonly signInUserCommand: SignInUserCommand,
                 readonly signUpUserCommand: SignUpUserCommand,
                 readonly signOutUserCommand: SignOutUserCommand,
-                readonly authenticateUserQuery: AuthenticateUserQuery,
-                readonly getUserInformationQuery: GetUserInformationQuery){}
+                readonly authenticateUserQuery: AuthenticateUserQuery){}
 
     readonly options: IClientOptions = {
         port: 8883,
@@ -91,11 +89,6 @@ export class MQTTController {
                         this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
                     }
                     console.log(response)
-                }
-
-                else if (topic === this.userInformationRequest) {
-                    const user = await this.getUserInformationQuery.execute(message.toString())
-                    this.client.publish(this.userInformationResponse, String(user))
                 }
             })
         })
