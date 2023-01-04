@@ -6,15 +6,19 @@ import {SignInUserCommand} from '../../Application/Commands/SignInUserCommand';
 import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
 import {SignOutUserCommand} from '../../Application/Commands/SignOutUserCommand';
 import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
+import { ValidateUserService } from '../../Domain/Services/Validations/ValidateUserService';
+import { ValidateUserTokenService } from '../../Domain/Services/Validations/ValidateUserTokenService';
 
 mongoose.connect(
   'mongodb+srv://gusreinaos:4MNbebz6E04hq5IV@cluster0.x1srwma.mongodb.net/test'
 );
 
-const repository = new UserRepository();
-const signInUserCommand = new SignInUserCommand(repository);
-const signUpUserCommand = new SignUpUserCommand(repository);
-const signOutUserCommand = new SignOutUserCommand(repository);
-const authenticateUserQuery = new AuthenticateUserQuery(repository);
+const userRepository = new UserRepository();
+const validateUserService = new ValidateUserService(userRepository);
+const validateUserTokenService = new ValidateUserTokenService(userRepository)
+const signInUserCommand = new SignInUserCommand(userRepository, validateUserService, validateUserTokenService);
+const signUpUserCommand = new SignUpUserCommand(userRepository, validateUserService);
+const signOutUserCommand = new SignOutUserCommand(userRepository, validateUserService, validateUserTokenService);
+const authenticateUserQuery = new AuthenticateUserQuery(userRepository);
 
 new MQTTController(signInUserCommand, signUpUserCommand, signOutUserCommand, authenticateUserQuery).connect();

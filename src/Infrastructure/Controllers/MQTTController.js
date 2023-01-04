@@ -48,11 +48,11 @@ class MQTTController {
         this.signOutUserCommand = signOutUserCommand;
         this.authenticateUserQuery = authenticateUserQuery;
         this.options = {
+            host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
             port: 8883,
-            host: 'cb9fe4f292fe4099ae5eeb9f230c8346.s2.eu.hivemq.cloud',
             protocol: 'mqtts',
-            username: process.env.USERNAME_MQTT,
-            password: process.env.PASSWORD_MQTT,
+            username: 'gusreinaos',
+            password: 'Mosquitto1204!'
         };
         this.client = mqtt_1.default.connect(this.options);
         this.authenticationRequest = 'authentication/#';
@@ -74,8 +74,8 @@ class MQTTController {
             this.client.on('message', (topic, message) => __awaiter(this, void 0, void 0, function* () {
                 //Request for signing in
                 if (topic === this.signInRequest) {
-                    const user = yield this.signInUserCommand.execute(message.toString());
-                    this.client.publish(this.signInResponse, JSON.stringify(user));
+                    const response = yield this.signInUserCommand.execute(message.toString());
+                    this.client.publish(this.signInResponse, JSON.stringify(response));
                 }
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
