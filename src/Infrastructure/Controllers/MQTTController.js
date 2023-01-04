@@ -48,11 +48,11 @@ class MQTTController {
         this.signOutUserCommand = signOutUserCommand;
         this.authenticateUserQuery = authenticateUserQuery;
         this.options = {
-            host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
             port: 8883,
+            host: 'cb9fe4f292fe4099ae5eeb9f230c8346.s2.eu.hivemq.cloud',
             protocol: 'mqtts',
-            username: 'gusreinaos',
-            password: 'Mosquitto1204!'
+            username: process.env.USERNAME_MQTT,
+            password: process.env.PASSWORD_MQTT,
         };
         this.client = mqtt_1.default.connect(this.options);
         this.authenticationRequest = 'authentication/#';
@@ -76,30 +76,31 @@ class MQTTController {
                 if (topic === this.signInRequest) {
                     const response = yield this.signInUserCommand.execute(message.toString());
                     this.client.publish(this.signInResponse, JSON.stringify(response));
+                    console.log(response);
                 }
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
-                    const user = yield this.signUpUserCommand.execute(message.toString());
-                    this.client.publish(this.signUpResponse, JSON.stringify(user));
-                    console.log(user);
+                    const response = yield this.signUpUserCommand.execute(message.toString());
+                    this.client.publish(this.signUpResponse, JSON.stringify(response));
+                    console.log(response);
                 }
                 //Request for signing out
                 else if (topic === this.signOutRequest) {
-                    const user = yield this.signOutUserCommand.execute(message.toString());
-                    this.client.publish(this.signOutResponse, JSON.stringify(user));
+                    const response = yield this.signOutUserCommand.execute(message.toString());
+                    this.client.publish(this.signOutResponse, JSON.stringify(response));
+                    console.log(response);
                 }
                 //Request for authorisation of use case
                 else if (topic === this.appointmentAuthRequest) {
-                    const receivedMessage = JSON.parse(message.toString());
-                    const userExists = yield this.authenticateUserQuery.execute(receivedMessage.jwt);
-                    if (userExists === true) {
-                        const response = delete receivedMessage.jwt;
-                        this.client.publish(this.appointmentRequest, response.toString());
-                        this.client.publish(this.appointmentAuthResponse, userExists.toString());
+                    const response = yield this.authenticateUserQuery.execute(message.toString());
+                    if (response.isSuccess) {
+                        this.client.publish(this.appointmentRequest, message.toString());
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response));
                     }
                     else {
-                        this.client.publish(this.appointmentAuthRequest, userExists.toString());
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response));
                     }
+                    console.log(response);
                 }
             }));
         });

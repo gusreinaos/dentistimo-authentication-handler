@@ -58,35 +58,34 @@ export class MQTTController {
                 if (topic === this.signInRequest) {
                     const response = await this.signInUserCommand.execute(message.toString())
                     this.client.publish(this.signInResponse, JSON.stringify(response))
+                    console.log(response)
                 }
 
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
-                    const user = await this.signUpUserCommand.execute(message.toString())
-                    this.client.publish(this.signUpResponse, JSON.stringify(user))
-                    console.log(user)
+                    const response = await this.signUpUserCommand.execute(message.toString())
+                    this.client.publish(this.signUpResponse, JSON.stringify(response))
+                    console.log(response)
                 }
 
                 //Request for signing out
                 else if (topic === this.signOutRequest) {
-                    const user = await this.signOutUserCommand.execute(message.toString())
-                    this.client.publish(this.signOutResponse, JSON.stringify(user))
+                    const response = await this.signOutUserCommand.execute(message.toString())
+                    this.client.publish(this.signOutResponse, JSON.stringify(response))
+                    console.log(response)
                 }
 
                 //Request for authorisation of use case
                 else if (topic === this.appointmentAuthRequest) {
-                    const receivedMessage = JSON.parse(message.toString())
-                    const userExists = await this.authenticateUserQuery.execute(receivedMessage.jwt)
-
-                    if (userExists === true) {
-                        const response = delete receivedMessage.jwt;
-                        this.client.publish(this.appointmentRequest, response.toString())
-                        this.client.publish(this.appointmentAuthResponse, userExists.toString())
+                    const response = await this.authenticateUserQuery.execute(message.toString())
+                    if (response.isSuccess) {
+                        this.client.publish(this.appointmentRequest, message.toString())
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
                     }
-
                     else {
-                        this.client.publish(this.appointmentAuthRequest, userExists.toString())
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
                     }
+                    console.log(response)
                 }
             })
         })

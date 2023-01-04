@@ -20,5 +20,5 @@ const validateUserTokenService = new ValidateUserTokenService_1.ValidateUserToke
 const signInUserCommand = new SignInUserCommand_1.SignInUserCommand(userRepository, validateUserService, validateUserTokenService);
 const signUpUserCommand = new SignUpUserCommand_1.SignUpUserCommand(userRepository, validateUserService);
 const signOutUserCommand = new SignOutUserCommand_1.SignOutUserCommand(userRepository, validateUserService, validateUserTokenService);
-const authenticateUserQuery = new AuthenticateUserQuery_1.AuthenticateUserQuery(userRepository);
+const authenticateUserQuery = new AuthenticateUserQuery_1.AuthenticateUserQuery(userRepository, validateUserService, validateUserTokenService);
 new MQTTController_1.MQTTController(signInUserCommand, signUpUserCommand, signOutUserCommand, authenticateUserQuery).connect();
