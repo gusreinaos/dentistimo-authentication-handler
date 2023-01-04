@@ -26,9 +26,9 @@ const data = {name: 'Emma',email: 'Emma@gmail.com',password: '123'}
 
 const data2 = {id: '63ac83382a40b13d74c89386'}
 
-const data3 = {email: 'gusreinaos@student.gu.se', password: '123'}
+const data3 = {email: 'jorge@gmail.com', password: 'JorgeJorge1'}
 
 console.log(process.env.PRIVATE_KEY)
 
-decrypt(encrypt(data2))
+decrypt(encrypt(data3))
 

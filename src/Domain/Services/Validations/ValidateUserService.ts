@@ -9,6 +9,11 @@ export class ValidateUserService {
         return user !== null
     }
 
+    async validatePassword(email: string, password: string): Promise<boolean> {
+        const user = await this.userRepository.getUserByEmail(email);
+        return user?.password !== password;
+    }
+
     async validateId(id: string): Promise <boolean> {
         const user = await this.userRepository.getUserById(id)
         return user !== null

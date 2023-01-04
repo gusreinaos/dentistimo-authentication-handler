@@ -35,8 +35,8 @@ export class SignOutUserCommand {
     const foundUser = await this.userRepository.getUserById(payload.id);
 
     const newUser = new User(String(null), foundUser!.name, foundUser!.email, foundUser!.password)
-    const user = await this.userRepository.updateUserById(payload.id, newUser);
+    await this.userRepository.updateUserById(payload.id, newUser);
 
-    return ProcessResponse.Success(user!)
+    return ProcessResponse.Success(newUser)
   }
 }

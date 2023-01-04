@@ -24,9 +24,7 @@ export class SignUpUserCommand {
       return ProcessResponse.Error(new ErrorResponse(UserAlreadyExistsError.code, UserAlreadyExistsError.detail))
     }
 
-    const jwt = signJWT(payload)
-
-    const user = new User(jwt, payload.name, payload.email, payload.password);
+    const user = new User('null', payload.name, payload.email, payload.password);
 
     const newUser = await this.userRepository.createUser(user);
 

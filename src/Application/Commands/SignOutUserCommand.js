@@ -14,8 +14,8 @@ exports.SignOutUserCommand = void 0;
 const User_1 = require("../../Domain/Entities/User");
 const ErrorResponse_1 = require("../../Domain/Responses/FlowResponse/ErrorResponse");
 const ProcessResponse_1 = require("../../Domain/Responses/FlowResponse/ProcessResponse");
-const UserAlreadySignedOutError_1 = require("../../Domain/Types/Errors/UserAlreadySignedOutError");
-const UserNotFoundError_1 = require("../../Domain/Types/Errors/UserNotFoundError");
+const UserAlreadySignedOutError_1 = require("../../Domain/Errors/UserAlreadySignedOutError");
+const UserNotFoundError_1 = require("../../Domain/Errors/UserNotFoundError");
 const CryptoUtils_1 = require("../../Domain/Utils/CryptoUtils");
 class SignOutUserCommand {
     constructor(userRepository, validateUserService, validateUserTokenService) {
@@ -38,8 +38,8 @@ class SignOutUserCommand {
             }
             const foundUser = yield this.userRepository.getUserById(payload.id);
             const newUser = new User_1.User(String(null), foundUser.name, foundUser.email, foundUser.password);
-            const user = yield this.userRepository.updateUserById(payload.id, newUser);
-            return ProcessResponse_1.ProcessResponse.Success(user);
+            yield this.userRepository.updateUserById(payload.id, newUser);
+            return ProcessResponse_1.ProcessResponse.Success(newUser);
         });
     }
 }

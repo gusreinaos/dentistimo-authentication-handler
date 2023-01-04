@@ -13,10 +13,9 @@ exports.SignUpUserCommand = void 0;
 /* eslint-disable prettier/prettier */
 const User_1 = require("../../Domain/Entities/User");
 const CryptoUtils_1 = require("../../Domain/Utils/CryptoUtils");
-const JwtUtils_1 = require("../../Domain/Utils/JwtUtils");
 const ProcessResponse_1 = require("../../Domain/Responses/FlowResponse/ProcessResponse");
 const ErrorResponse_1 = require("../../Domain/Responses/FlowResponse/ErrorResponse");
-const UserAlreadyExistsError_1 = require("../../Domain/Types/Errors/UserAlreadyExistsError");
+const UserAlreadyExistsError_1 = require("../../Domain/Errors/UserAlreadyExistsError");
 class SignUpUserCommand {
     constructor(userRepository, validateUserService) {
         this.userRepository = userRepository;
@@ -29,8 +28,7 @@ class SignUpUserCommand {
             if (userExists) {
                 return ProcessResponse_1.ProcessResponse.Error(new ErrorResponse_1.ErrorResponse(UserAlreadyExistsError_1.UserAlreadyExistsError.code, UserAlreadyExistsError_1.UserAlreadyExistsError.detail));
             }
-            const jwt = (0, JwtUtils_1.signJWT)(payload);
-            const user = new User_1.User(jwt, payload.name, payload.email, payload.password);
+            const user = new User_1.User('null', payload.name, payload.email, payload.password);
             const newUser = yield this.userRepository.createUser(user);
             return ProcessResponse_1.ProcessResponse.Success(newUser);
         });
