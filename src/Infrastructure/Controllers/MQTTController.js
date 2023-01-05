@@ -40,7 +40,7 @@ exports.MQTTController = void 0;
 /* eslint-disable prettier/prettier */
 const mqtt_1 = __importDefault(require("mqtt"));
 const dotenv = __importStar(require("dotenv"));
-dotenv.config({ path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env' });
+dotenv.config({ path: '../../../.env' });
 class MQTTController {
     constructor(signInUserCommand, signUpUserCommand, signOutUserCommand, authenticateUserQuery) {
         this.signInUserCommand = signInUserCommand;
@@ -49,7 +49,7 @@ class MQTTController {
         this.authenticateUserQuery = authenticateUserQuery;
         this.options = {
             port: 8883,
-            host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
+            host: 'cb9fe4f292fe4099ae5eeb9f230c8346.s2.eu.hivemq.cloud',
             protocol: 'mqtts',
             username: process.env.USERNAME_MQTT,
             password: process.env.PASSWORD_MQTT,
@@ -65,6 +65,8 @@ class MQTTController {
         this.appointmentAuthRequest = 'authentication/appointment/request';
         this.appointmentAuthResponse = 'authentication/appointment/response';
         this.appointmentRequest = 'appointment/request';
+        this.userInformationRequest = 'information/request';
+        this.userInformationResponse = 'information/response';
     }
     connect() {
         this.client.on('connect', () => {
@@ -74,32 +76,33 @@ class MQTTController {
             this.client.on('message', (topic, message) => __awaiter(this, void 0, void 0, function* () {
                 //Request for signing in
                 if (topic === this.signInRequest) {
-                    const user = yield this.signInUserCommand.execute(message.toString());
-                    this.client.publish(this.signInResponse, JSON.stringify(user));
+                    const response = yield this.signInUserCommand.execute(message.toString());
+                    this.client.publish(this.signInResponse, JSON.stringify(response));
+                    console.log(response);
                 }
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
-                    const user = yield this.signUpUserCommand.execute(message.toString());
-                    this.client.publish(this.signUpResponse, JSON.stringify(user));
-                    console.log(user);
+                    const response = yield this.signUpUserCommand.execute(message.toString());
+                    this.client.publish(this.signUpResponse, JSON.stringify(response));
+                    console.log(response);
                 }
                 //Request for signing out
                 else if (topic === this.signOutRequest) {
-                    const user = yield this.signOutUserCommand.execute(message.toString());
-                    this.client.publish(this.signOutResponse, String(user));
+                    const response = yield this.signOutUserCommand.execute(message.toString());
+                    this.client.publish(this.signOutResponse, JSON.stringify(response));
+                    console.log(response);
                 }
                 //Request for authorisation of use case
                 else if (topic === this.appointmentAuthRequest) {
-                    const receivedMessage = JSON.parse(message.toString());
-                    const userExists = yield this.authenticateUserQuery.execute(receivedMessage.jwt);
-                    if (userExists === true) {
-                        const response = delete receivedMessage.jwt;
-                        this.client.publish(this.appointmentRequest, response.toString());
-                        this.client.publish(this.appointmentAuthResponse, userExists.toString());
+                    const response = yield this.authenticateUserQuery.execute(message.toString());
+                    if (response.isSuccess) {
+                        this.client.publish(this.appointmentRequest, message.toString());
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response));
                     }
                     else {
-                        this.client.publish(this.appointmentAuthRequest, userExists.toString());
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response));
                     }
+                    console.log(response);
                 }
             }));
         });

@@ -1,16 +1,15 @@
+/* eslint-disable prettier/prettier */
 import jwt from 'jsonwebtoken';
 const fs = require('fs');
 import * as dotenv from 'dotenv';
 
 dotenv.config({
-  path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env',
+  path: '../../../.env',
 });
 
 const RSA_PRIVATE_KEY = {
-  key: fs.readFileSync(
-    '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/jwtRS256.key'
-  ),
-  passphrase: String(process.env.PASSWORD_MQTT),
+  key: fs.readFileSync('../../../jwtRS256.key'),
+  passphrase: String(process.env.PASSWORD_JWT),
 };
 
 // Sign jwt

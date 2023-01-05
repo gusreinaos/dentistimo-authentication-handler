@@ -1,16 +1,39 @@
 /* eslint-disable prettier/prettier */
+import { ValidateUserService } from '../../Domain/Services/Validations/ValidateUserService';
 import {UserRepository} from '../../Infrastructure/Repositories/UserRepository';
+import { Response } from '../../Domain/Responses/FlowResponse/Response';
+import { ProcessResponse } from '../../Domain/Responses/FlowResponse/ProcessResponse';
+import { ErrorResponse } from '../../Domain/Responses/FlowResponse/ErrorResponse';
+import { UserNotFoundError } from '../../Domain/Errors/UserNotFoundError';
+import { ValidateUserTokenService } from '../../Domain/Services/Validations/ValidateUserTokenService';
+import { UserNotAuthenticatedError } from '../../Domain/Errors/UnerNotAuthenticatedError';
 
 export class AuthenticateUserQuery {
-  constructor(readonly userRepository: UserRepository) {}
+  constructor(readonly userRepository: UserRepository,
+              readonly validateUserService: ValidateUserService,
+              readonly validateUserTokenService: ValidateUserTokenService) {}
 
-  async execute(jwt: string): Promise<boolean> {
+  async execute(payload: string): Promise<Response> {
 
-    const user = await this.userRepository.getUserByAccessToken(jwt);
+    const message = JSON.parse(payload)
 
-    if (user !== null) {
-      return true;
+    const userExists = await this.validateUserService.validateId(message.userId)
+    if(!userExists) {
+      return ProcessResponse.Error(new ErrorResponse(UserNotFoundError.code, UserNotFoundError.detail))
     }
-    return false;
+
+
+    const tokenExists = await this.validateUserTokenService.validateId(message.userId)
+    if(!tokenExists) {
+      return ProcessResponse.Error(new ErrorResponse(UserNotAuthenticatedError.code, UserNotAuthenticatedError.detail))
+    }
+
+
+    console.log(message)
+
+    const user = await this.userRepository.getUserById(message.id);
+
+    return ProcessResponse.Success(user!)
   }
+
 }

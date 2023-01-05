@@ -7,22 +7,23 @@ import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
 import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
 import * as dotenv from 'dotenv';
 
-dotenv.config({ path: '/Users/oscarreinagustafsson/Desktop/Göteborgs Universitet/Distributed Systems/Project/T2-AuthenticationHandler/.env' });
+dotenv.config({ path: '../../../.env' });
 
 export class MQTTController {
 
     constructor(readonly signInUserCommand: SignInUserCommand,
                 readonly signUpUserCommand: SignUpUserCommand,
                 readonly signOutUserCommand: SignOutUserCommand,
-                readonly authenticateUserQuery: AuthenticateUserQuery,){}
+                readonly authenticateUserQuery: AuthenticateUserQuery){}
 
     readonly options: IClientOptions = {
         port: 8883,
-        host: '80a9b426b200440c81e9c17c2ba85bc2.s2.eu.hivemq.cloud',
+        host: 'cb9fe4f292fe4099ae5eeb9f230c8346.s2.eu.hivemq.cloud',
         protocol: 'mqtts',
         username: process.env.USERNAME_MQTT,
         password: process.env.PASSWORD_MQTT,
     }
+
 
     readonly client = mqtt.connect(this.options);
 
@@ -42,6 +43,9 @@ export class MQTTController {
 
     readonly appointmentRequest = 'appointment/request'
 
+    readonly userInformationRequest = 'information/request'
+    readonly userInformationResponse = 'information/response'
+
     public connect() {
 
         this.client.on('connect', () => {
@@ -55,37 +59,36 @@ export class MQTTController {
 
                 //Request for signing in
                 if (topic === this.signInRequest) {
-                    const user = await this.signInUserCommand.execute(message.toString())
-                    this.client.publish(this.signInResponse, JSON.stringify(user))
+                    const response = await this.signInUserCommand.execute(message.toString())
+                    this.client.publish(this.signInResponse, JSON.stringify(response))
+                    console.log(response)
                 }
 
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
-                    const user = await this.signUpUserCommand.execute(message.toString())
-                    this.client.publish(this.signUpResponse, JSON.stringify(user))
-                    console.log(user)
+                    const response = await this.signUpUserCommand.execute(message.toString())
+                    this.client.publish(this.signUpResponse, JSON.stringify(response))
+                    console.log(response)
                 }
 
                 //Request for signing out
                 else if (topic === this.signOutRequest) {
-                    const user = await this.signOutUserCommand.execute(message.toString())
-                    this.client.publish(this.signOutResponse, JSON.stringify(user))
+                    const response = await this.signOutUserCommand.execute(message.toString())
+                    this.client.publish(this.signOutResponse, JSON.stringify(response))
+                    console.log(response)
                 }
 
                 //Request for authorisation of use case
                 else if (topic === this.appointmentAuthRequest) {
-                    const receivedMessage = JSON.parse(message.toString())
-                    const userExists = await this.authenticateUserQuery.execute(receivedMessage.jwt)
-
-                    if (userExists === true) {
-                        const response = delete receivedMessage.jwt;
-                        this.client.publish(this.appointmentRequest, response.toString())
-                        this.client.publish(this.appointmentAuthResponse, userExists.toString())
+                    const response = await this.authenticateUserQuery.execute(message.toString())
+                    if (response.isSuccess) {
+                        this.client.publish(this.appointmentRequest, message.toString())
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
                     }
-
                     else {
-                        this.client.publish(this.appointmentAuthRequest, userExists.toString())
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
                     }
+                    console.log(response)
                 }
             })
         })
