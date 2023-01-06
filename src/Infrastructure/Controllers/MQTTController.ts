@@ -18,23 +18,31 @@ export class MQTTController {
                 readonly signUpUserCommand: SignUpUserCommand,
                 readonly signOutUserCommand: SignOutUserCommand,
                 readonly authenticateUserQuery: AuthenticateUserQuery){}
-
-    readonly options: IClientOptions = {
+    //This is on standby due to complications in testing circuitbreaker
+    /*readonly options: IClientOptions = {
         port: 8883,
         host: 'cb9fe4f292fe4099ae5eeb9f230c8346.s2.eu.hivemq.cloud',
         protocol: 'mqtts',
         username: 'T2Project',
         password: 'Mamamia1234.'
-        }
+        }'
+    */
                 
-
+       
+    
     readonly circuitBreakerOptions = {
         timeout: 1000,
         errorThresholdPercentage: 50,
         resetTimeout: 5000
       };
+    readonly client = mqtt.connect('mqtt://broker.hivemq.com',{
+        port: 1883,
+        username: 'T2Project',
+        password: 'Mamamia1234.',
+        
+    });
 
-    readonly client = mqtt.connect(this.options);
+    //readonly client = mqtt.connect(this.options);
 
     readonly authenticationRequest = 'authentication/#'
 
@@ -51,6 +59,7 @@ export class MQTTController {
     readonly appointmentAuthResponse = 'authentication/appointment/response'
 
     readonly appointmentRequest = 'appointment/request'
+    readonly appointmentResponse = 'appointment/response'
 
     readonly userInformationRequest = 'information/request'
     readonly userInformationResponse = 'information/response'
@@ -61,6 +70,7 @@ export class MQTTController {
             console.log('Client is connected to the internet');
 
             this.client.subscribe(this.authenticationRequest, {qos: 1})
+            this.client.subscribe(this.appointmentResponse, {qos: 1})
 
             console.log('Client has subscribed successfully')
 
@@ -158,8 +168,20 @@ export class MQTTController {
 
                 //Request for authorisation of use case
                 else if (topic === this.appointmentAuthRequest) {
-                
+                    
+                    /*const response = await this.authenticateUserQuery.execute(message.toString())
+                    
+                    if (response.isSuccess) {
+                        this.client.publish(this.appointmentRequest, message.toString())
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
+                    }
 
+                    else {
+                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
+                    }
+                    console.log(response)
+                */
+                
                     const authenticateUserBreaker = new CircuitBreaker((encryptedMessage: string) => {
                         return this.authenticateUserQuery.execute(encryptedMessage);
                     }, this.circuitBreakerOptions)
@@ -169,7 +191,7 @@ export class MQTTController {
                         authenticateUserBreaker.fallback(() => {
                             console.log('System is down')
                         });
-                        const response = await this.authenticateUserQuery.execute(message.toString())
+                        const response = await authenticateUserBreaker.fire(message.toString())
 
 
                         if (authenticateUserBreaker.stats.fallbacks > 0) {
@@ -194,6 +216,12 @@ export class MQTTController {
                         console.log(error)
             
                     }
+                
+                }
+                
+                else if(topic === this.appointmentResponse) {
+                    console.log('--------------------------------')
+                    console.log(message.toString())
                 }
             })    
         })
