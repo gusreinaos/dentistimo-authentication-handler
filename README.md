@@ -12,6 +12,11 @@ There are some technical requirements that need to be taken into consideration b
 - Installing [NodeJS](https://nodejs.org/en/download/) V14.21.2 or greater
 - Installing [Mongoose](https://mongoosejs.com/) (MongoDB object-database mapper)
 
+In order to install the **required packages** for the system to execute, make sure to run the following command:
+```
+npm i
+```
+
 Furthermore, this module establishes communication with others via **MQTT** via [HiveMQ](https://www.hivemq.com/) which is a standard messaging protocol. Having MQTT publish/subscribe protocol provides a scalable and reliable way to connect devices over the Internet
 
 Some more information about the MQTT protocol can be read [here](https://www.hivemq.com/docs/hivemq/4.10/user-guide/introduction.html)
