@@ -6,9 +6,10 @@ import {SignOutUserCommand} from '../../Application/Commands/SignOutUserCommand'
 import {SignUpUserCommand} from '../../Application/Commands/SignUpUserCommand';
 import {AuthenticateUserQuery} from '../../Application/Queries/AuthenticateUserQuery';
 
-import CircuitBreaker = require('opossum')
+import CircuitBreaker from 'opossum'
 
 import * as dotenv from 'dotenv';
+import { Response } from '../../Domain/Responses/FlowResponse/Response';
 
 dotenv.config({ path: '../../../.env' });
 
@@ -25,21 +26,21 @@ export class MQTTController {
         protocol: 'mqtts',
         username: 'T2Project',
         password: 'Mamamia1234.'
-        }'
-    */
+        }
+        */
                 
-       
-    
-    readonly circuitBreakerOptions = {
-        timeout: 1000,
-        errorThresholdPercentage: 50,
-        resetTimeout: 5000
-      };
+    options: CircuitBreaker.Options = {
+        timeout: 80, // If our function takes longer than 3 seconds, trigger a failure
+        errorThresholdPercentage: 50,// When 50% of requests fail, trip the circuit
+        resetTimeout: 10000 // After 30 seconds, try again.
+        };   
+   
+   
     readonly client = mqtt.connect('mqtt://broker.hivemq.com',{
         port: 1883,
         username: 'T2Project',
         password: 'Mamamia1234.',
-        
+
     });
 
     //readonly client = mqtt.connect(this.options);
@@ -64,8 +65,11 @@ export class MQTTController {
     readonly userInformationRequest = 'information/request'
     readonly userInformationResponse = 'information/response'
 
+    executionTimes:number[]  = [];
+    
     public connect() {
-
+        
+        let counter = 0;
         this.client.on('connect', () => {
             console.log('Client is connected to the internet');
 
@@ -79,55 +83,72 @@ export class MQTTController {
 
                 //Request for signing in
                 if (topic === this.signInRequest) {
-
-                    const signInBreaker = new CircuitBreaker((encryptedMessage: string) => {
-                        return this.signInUserCommand.execute(encryptedMessage);
-                    }, this.circuitBreakerOptions)
-
+                    
+                   
+                    const signInBreaker: CircuitBreaker = new CircuitBreaker((encryptedMessage: string) => {
+                        return this.signInUserCommand.functionThatWouldFail(encryptedMessage);
+                    }, this.options)
+                    
                     try {
-
-                        signInBreaker.fallback(() => {
-                            console.log('System is down')
-                        });
+                        
+                        signInBreaker.on('success', result => {console.log(result)});
+                        signInBreaker.on('timeout', () => console.log('timeout') );
+                        signInBreaker.on('reject', () => console.log('reject'));
+                        signInBreaker.on('open', () => console.log('open'));
+                        signInBreaker.on('halfOpen', () => console.log('halfOpen'));
+                        signInBreaker.on('close', () => console.log('close'));
+                        signInBreaker.fallback(() => 'Sorry, out of service right now');
+                        signInBreaker.on('fallback', () => console.log('Sorry, out of service right now'));
 
                         const response = await signInBreaker.fire(message.toString())
-
-                        if (signInBreaker.stats.fallbacks > 0) {
-                            this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
-                        }
-                        else {
-                            this.client.publish(this.signInResponse, JSON.stringify(response))
-                        }
+                        //console.log(response)
+                       
+                        //if (signInBreaker.stats.fallbacks > 0) {
+                          //  this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
+                        //}
+                        
+                     
+                        this.client.publish(this.signInResponse, JSON.stringify(response))
+                    
+                        
                     }
 
                     catch (error) {
                         console.log(error)
-                    }
+                    }                   
                     
                 }
-
+                
                 //Request for signing up
                 else if (topic === this.signUpRequest) {
 
                     const signUpBreaker = new CircuitBreaker((encryptedMessage: string) => {
                         return this.signUpUserCommand.execute(encryptedMessage);
-                    }, this.circuitBreakerOptions)
+                    }, this.options)
 
+                   
                     try {
-
-                        signUpBreaker.fallback(() => {
-                            console.log('System is down')
-                        });
+                        
+                        signUpBreaker.on('success', result => {console.log(result)});
+                        signUpBreaker.on('timeout', () => console.log('timeout') );
+                        signUpBreaker.on('reject', () => console.log('reject'));
+                        signUpBreaker.on('open', () => console.log('open'));
+                        signUpBreaker.on('halfOpen', () => console.log('halfOpen'));
+                        signUpBreaker.on('close', () => console.log('close'));
+                        signUpBreaker.fallback(() => 'Sorry, out of service right now');
+                        signUpBreaker.on('fallback', () => console.log('Sorry, out of service right now'));
 
                         const response = await signUpBreaker.fire(message.toString())
-
-                        if (signUpBreaker.stats.fallbacks > 0) {
-                            this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
-                        }
-
-                        else {
-                            this.client.publish(this.signInResponse, JSON.stringify(response))
-                        }
+                        //console.log(response)
+                       
+                        //if (signInBreaker.stats.fallbacks > 0) {
+                          //  this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
+                        //}
+                        
+                     
+                        this.client.publish(this.signUpResponse, JSON.stringify(response))
+                    
+                        
                     }
 
                     catch (error) {
@@ -138,26 +159,33 @@ export class MQTTController {
 
                 //Request for signing out
                 else if (topic === this.signOutRequest) {
-
+                    
                     const signOutBreaker = new CircuitBreaker((encryptedMessage: string) => {
                         return this.signOutUserCommand.execute(encryptedMessage);
-                      }, this.circuitBreakerOptions)
+                      }, this.options)
 
-                    try {
-
-                        signOutBreaker.fallback(() => {
-                            console.log('System is down')
-                        });
+                   
+                      try {
+                        
+                        signOutBreaker.on('success', result => {console.log(result)});
+                        signOutBreaker.on('timeout', () => console.log('timeout') );
+                        signOutBreaker.on('open', () => console.log('open'));
+                        signOutBreaker.on('halfOpen', () => console.log('halfOpen'));
+                        signOutBreaker.on('close', () => console.log('close'));
+                        signOutBreaker.fallback(() => 'Sorry, out of service right now');
+                        signOutBreaker.on('fallback', () => console.log('Sorry, out of service right now'));
 
                         const response = await signOutBreaker.fire(message.toString())
-
-                        if (signOutBreaker.stats.fallbacks > 0) {
-                            this.client.publish(this.signOutResponse, JSON.stringify({message:'CircuitBreaker activated'}))
-                        }
-
-                        else {
-                            this.client.publish(this.signOutResponse, JSON.stringify(response))
-                        }
+                        //console.log(response)
+                       
+                        //if (signInBreaker.stats.fallbacks > 0) {
+                          //  this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
+                        //}
+                        
+                     
+                        this.client.publish(this.signOutResponse, JSON.stringify(response))
+                    
+                        
                     }
 
                     catch (error) {
@@ -184,46 +212,67 @@ export class MQTTController {
                 
                     const authenticateUserBreaker = new CircuitBreaker((encryptedMessage: string) => {
                         return this.authenticateUserQuery.execute(encryptedMessage);
-                    }, this.circuitBreakerOptions)
+                    }, this.options)
 
                     try {
+                        
+                        authenticateUserBreaker.on('success', result => {console.log(result)});
+                        authenticateUserBreaker.on('timeout', () => console.log('timeout') );
+                        authenticateUserBreaker.on('reject', () => console.log('reject'));
+                        authenticateUserBreaker.on('open', () => console.log('open'));
+                        authenticateUserBreaker.on('halfOpen', () => console.log('halfOpen'));
+                        authenticateUserBreaker.on('close', () => console.log('close'));
+                        authenticateUserBreaker.fallback(() => 'Sorry, out of service right now');
+                        authenticateUserBreaker.on('fallback', () => console.log('Sorry, out of service right now'));
 
-                        authenticateUserBreaker.fallback(() => {
-                            console.log('System is down')
-                        });
                         const response = await authenticateUserBreaker.fire(message.toString())
-
-
-                        if (authenticateUserBreaker.stats.fallbacks > 0) {
-                            this.client.publish(this.signOutResponse, JSON.stringify({message:'CircuitBreaker activated'}))
+                        //console.log(response)
+                       
+                        if (response.isSuccess) {
+                            this.client.publish(this.appointmentRequest, message.toString())
+                            this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
                         }
 
                         else {
-
-                            if (response.isSuccess) {
-                                this.client.publish(this.appointmentRequest, message.toString())
-                                this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
-                            }
-
-                            else {
-                                this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
-                            }
-                            console.log(response)
+                            this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
                         }
+                            console.log(response)
+                        
+                        //if (signInBreaker.stats.fallbacks > 0) {
+                          //  this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
+                        //}
+                        
+                     
+                        this.client.publish(this.signInResponse, JSON.stringify(response))
+                    
+                        
                     }
 
                     catch (error) {
                         console.log(error)
-            
                     }
                 
                 }
                 
-                else if(topic === this.appointmentResponse) {
+                /*else if(topic === this.appointmentResponse) {
                     console.log('--------------------------------')
                     console.log(message.toString())
                 }
+                else if (topic === this.signOutResponse) {
+                    console.log(message.toString());
+                }
+                else if(topic === this.appointmentAuthResponse) {
+                    console.log(message.toString())
+                }
+                else if(topic === "authentication/signIn/response") {
+                    counter++
+                    console.log("Sign in response: " + message.toString())
+                    console.log(counter)
+                }
+                */
             })    
         })
+        
     }
+   
 }

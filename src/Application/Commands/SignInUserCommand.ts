@@ -11,6 +11,7 @@ import {UserRepository} from '../../Infrastructure/Repositories/UserRepository';
 import { UserNotFoundError } from '../../Domain/Errors/UserNotFoundError';
 import { UserAlreadySignedInError } from '../../Domain/Errors/UserAlreadySignedInError';
 import { UserIncorrectPasswordError } from '../../Domain/Errors/UserIncorrectPasswordError';
+import { resolve } from 'path';
 
 export class SignInUserCommand {
 
@@ -51,5 +52,10 @@ export class SignInUserCommand {
     const user = await this.userRepository.getUserByEmail(payload.email);
 
     return ProcessResponse.Success(user!)
+  }
+  async functionThatWouldFail(encrytedMessage: string): Promise<Response> {
+    return new Promise((resolve) => {
+      resolve(this.execute(encrytedMessage))
+    })
   }
 }
