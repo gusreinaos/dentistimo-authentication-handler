@@ -12,9 +12,9 @@ export function encrypt(text: object) {
 // Decrypt
 export function decrypt(encryptedMessage: string){
   const bytes = CryptoTS.AES.decrypt(encryptedMessage, PRIVATE_KEY).toString(CryptoTS.enc.Utf8);
-  console.log(bytes.toString())
+  //console.log(bytes.toString())
   const finalMessage = JSON.parse(bytes);
-  console.log(finalMessage)
+  //console.log(finalMessage)
   return finalMessage;
 }
 
