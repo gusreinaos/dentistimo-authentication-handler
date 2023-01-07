@@ -3,7 +3,7 @@
 # T2 AuthenticationHandler
 This repository is in charge of ensuring authentication for the Dentistimo project. For this, it provides our user with the functionality to be able to Sign In, Sign Up, Sign Out or authenticate an appointment booking. 
 
-This platform has been developed using a [**Clean Architecture**](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) and referring to **SOLID Principles**. That is, group the different classes that we were using in different folders such as controllers, data, repositories and use cases. Having these folders helped us understand where each functionality of the program was located and thus maintain a certain order in the creation of the code.
+This platform has been developed using a [**Clean Architecture**](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) and referring to **SOLID Principles**. That is, group the different classes that we were using in different folders such as Infrastructure, Application and Domain in order to keep clear the sepparation of concerns. Having these folders helped us understand where each functionality of the program was located and thus maintain a certain order in the creation of the code.
 
 ## 🛠 Pre-Requirements 
 There are some technical requirements that need to be taken into consideration before having full access to the program's functionality, such as:
