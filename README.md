@@ -22,12 +22,12 @@ Some more information can be read [here](https://www.hivemq.com/docs/hivemq/4.10
 
 HTTPS
 ```
-git clone https://git.chalmers.se/courses/dit355/dit356-2022/t-2/T2-UserInterface.git
+git clone https://git.chalmers.se/courses/dit355/dit356-2022/t-2/T2-AuthenticationHandler.git
 ```
 
 SSH
 ```
-git clone git@git.chalmers.se:courses/dit355/dit356-2022/t-2/T2-UserInterface.git
+git clone git@git.chalmers.se:courses/dit355/dit356-2022/t-2/T2-AuthenticationHandler.git
 ```
 - Open the project in the selected IDE
 
