@@ -14,7 +14,7 @@ There are some technical requirements that need to be taken into consideration b
 
 Furthermore, this module establishes communication with others via **MQTT** via [HiveMQ](https://www.hivemq.com/) which is a standard messaging protocol. Having MQTT publish/subscribe protocol provides a scalable and reliable way to connect devices over the Internet
 
-Some more information can be read [here](https://www.hivemq.com/docs/hivemq/4.10/user-guide/introduction.html)
+Some more information about the MQTT protocol can be read [here](https://www.hivemq.com/docs/hivemq/4.10/user-guide/introduction.html)
 
 ## 🚀 Getting Started 
 
