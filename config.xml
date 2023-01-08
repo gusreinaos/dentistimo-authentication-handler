@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="config.xsd">
+
+    <listeners>
+        <tcp-listener>
+            <port>1883</port>
+            <bind-address>localhost</bind-address>
+        </tcp-listener>
+		<websocket-listener>
+          <port>1884</port>
+          <bind-address>localhost</bind-address>
+          <path>/mqtt</path>
+          <name>websocket-listener</name>
+          <subprotocols>
+              <subprotocol>mqttv3.1</subprotocol>
+              <subprotocol>mqtt</subprotocol>
+          </subprotocols>
+          <allow-extensions>true</allow-extensions>
+      </websocket-listener>
+    </listeners>  
+    
+    <mqtt>
+
+        <queued-messages>
+            <max-queue-size>1000</max-queue-size>
+            <strategy>discard</strategy>
+        </queued-messages>
+
+        <topic-alias>
+            <enabled>true</enabled>
+            <max-per-client>5</max-per-client>
+        </topic-alias>
+
+        <message-expiry>
+            <max-interval>4294967296</max-interval> <!-- this value means no message expiry -->
+        </message-expiry>
+
+        <session-expiry>
+            <max-interval>4294967295</max-interval> <!-- ~ 130 years -->
+        </session-expiry>
+
+        <keep-alive>
+            <allow-unlimited>true</allow-unlimited>
+            <max-keep-alive>65535</max-keep-alive>
+        </keep-alive>
+
+        <packets>
+            <max-packet-size>268435460</max-packet-size> <!-- 256 MB -->
+        </packets>
+
+        <receive-maximum>
+            <server-receive-maximum>10</server-receive-maximum>
+        </receive-maximum>
+
+        <quality-of-service>
+            <max-qos>2</max-qos>
+        </quality-of-service>
+
+        <wildcard-subscriptions>
+            <enabled>true</enabled>
+        </wildcard-subscriptions>
+
+        <shared-subscriptions>
+            <enabled>true</enabled>
+        </shared-subscriptions>
+
+        <subscription-identifier>
+            <enabled>true</enabled>
+        </subscription-identifier>
+
+        <retained-messages>
+            <enabled>true</enabled>
+        </retained-messages>
+
+    </mqtt>
+    
+    <restrictions>
+    <!-- Maximum simultaneous connections (-1 = unlimited) -->
+        <max-connections>25</max-connections>
+    <!-- Maximum length of client identifier -->
+        <max-client-id-length>65535</max-client-id-length>
+    <!-- Incoming/Outgoing limit in bytes/second (0 = unlimited) -->
+        <incoming-bandwidth-throttling>0</incoming-bandwidth-throttling>
+    </restrictions>
+    
+    <overload-protection>
+        <enabled>true</enabled>
+    </overload-protection>
+    
+</hivemq>
