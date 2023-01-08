@@ -20,19 +20,20 @@ export class MQTTController {
                 readonly signOutUserCommand: SignOutUserCommand,
                 readonly authenticateUserQuery: AuthenticateUserQuery){}
     //This is on standby due to complications in testing circuitbreaker
-    /*readonly options: IClientOptions = {
+    /*readonly mqttoptions: IClientOptions = {
         port: 8883,
         host: 'cb9fe4f292fe4099ae5eeb9f230c8346.s2.eu.hivemq.cloud',
         protocol: 'mqtts',
         username: 'T2Project',
         password: 'Mamamia1234.'
         }
-        */
+    */    
+        
                 
     options: CircuitBreaker.Options = {
-        timeout: 80, // If our function takes longer than 3 seconds, trigger a failure
+        timeout: 500, // If our function takes longer than 3 seconds, trigger a failure
         errorThresholdPercentage: 50,// When 50% of requests fail, trip the circuit
-        resetTimeout: 10000 // After 30 seconds, try again.
+        resetTimeout: 5000 // After 30 seconds, try again.
         };   
    
    
@@ -42,8 +43,9 @@ export class MQTTController {
         password: 'Mamamia1234.',
 
     });
+    
 
-    //readonly client = mqtt.connect(this.options);
+    //readonly client = mqtt.connect(this.mqttoptions);
 
     readonly authenticationRequest = 'authentication/#'
 
