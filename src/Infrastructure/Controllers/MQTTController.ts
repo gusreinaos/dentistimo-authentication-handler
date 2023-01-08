@@ -20,19 +20,22 @@ export class MQTTController {
                 readonly signOutUserCommand: SignOutUserCommand,
                 readonly authenticateUserQuery: AuthenticateUserQuery){}
     //This is on standby due to complications in testing circuitbreaker
-    /*readonly options: IClientOptions = {
+    /*readonly mqttoptions: IClientOptions = {
         port: 8883,
         host: 'cb9fe4f292fe4099ae5eeb9f230c8346.s2.eu.hivemq.cloud',
         protocol: 'mqtts',
         username: 'T2Project',
         password: 'Mamamia1234.'
         }
-        */
+
+    */
+        
+        
                 
     options: CircuitBreaker.Options = {
-        timeout: 80, // If our function takes longer than 3 seconds, trigger a failure
+        timeout: 100, // If our function takes longer than 3 seconds, trigger a failure
         errorThresholdPercentage: 50,// When 50% of requests fail, trip the circuit
-        resetTimeout: 10000 // After 30 seconds, try again.
+        resetTimeout: 5000 // After 30 seconds, try again.
         };   
    
    
@@ -42,8 +45,10 @@ export class MQTTController {
         password: 'Mamamia1234.',
 
     });
+    
+    
 
-    //readonly client = mqtt.connect(this.options);
+    //readonly client = mqtt.connect(this.mqttoptions);
 
     readonly authenticationRequest = 'authentication/#'
 
@@ -73,7 +78,7 @@ export class MQTTController {
         this.client.on('connect', () => {
             console.log('Client is connected to the internet');
 
-            this.client.subscribe(this.authenticationRequest, {qos: 1})
+            this.client.subscribe(this.authenticationRequest, {qos: 2})
             this.client.subscribe(this.appointmentResponse, {qos: 1})
 
             console.log('Client has subscribed successfully')
@@ -91,24 +96,18 @@ export class MQTTController {
                     
                     try {
                         
-                        signInBreaker.on('success', result => {console.log(result)});
+                       
                         signInBreaker.on('timeout', () => console.log('timeout') );
                         signInBreaker.on('reject', () => console.log('reject'));
                         signInBreaker.on('open', () => console.log('open'));
-                        signInBreaker.on('halfOpen', () => console.log('halfOpen'));
+                        //signInBreaker.on('halfOpen', () => console.log('halfOpen'));
                         signInBreaker.on('close', () => console.log('close'));
                         signInBreaker.fallback(() => 'Sorry, out of service right now');
                         signInBreaker.on('fallback', () => console.log('Sorry, out of service right now'));
 
                         const response = await signInBreaker.fire(message.toString())
-                        //console.log(response)
                        
-                        //if (signInBreaker.stats.fallbacks > 0) {
-                          //  this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
-                        //}
-                        
-                     
-                        this.client.publish(this.signInResponse, JSON.stringify(response))
+                        this.client.publish(this.signInResponse, JSON.stringify(response), {qos: 1})
                     
                         
                     }
@@ -129,24 +128,18 @@ export class MQTTController {
                    
                     try {
                         
-                        signUpBreaker.on('success', result => {console.log(result)});
+                        
                         signUpBreaker.on('timeout', () => console.log('timeout') );
                         signUpBreaker.on('reject', () => console.log('reject'));
                         signUpBreaker.on('open', () => console.log('open'));
-                        signUpBreaker.on('halfOpen', () => console.log('halfOpen'));
-                        signUpBreaker.on('close', () => console.log('close'));
+                        signUpBreaker.on('halfOpen', () => console.log('Circuitbreaker is closed'));
+                        signUpBreaker.on('close', () => console.log('Circuitbreaker is closed'));
                         signUpBreaker.fallback(() => 'Sorry, out of service right now');
                         signUpBreaker.on('fallback', () => console.log('Sorry, out of service right now'));
 
                         const response = await signUpBreaker.fire(message.toString())
-                        //console.log(response)
                        
-                        //if (signInBreaker.stats.fallbacks > 0) {
-                          //  this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
-                        //}
-                        
-                     
-                        this.client.publish(this.signUpResponse, JSON.stringify(response))
+                        this.client.publish(this.signUpResponse, JSON.stringify(response), {qos:1})
                     
                         
                     }
@@ -167,23 +160,19 @@ export class MQTTController {
                    
                       try {
                         
-                        signOutBreaker.on('success', result => {console.log(result)});
+                        
                         signOutBreaker.on('timeout', () => console.log('timeout') );
                         signOutBreaker.on('open', () => console.log('open'));
-                        signOutBreaker.on('halfOpen', () => console.log('halfOpen'));
+                        
                         signOutBreaker.on('close', () => console.log('close'));
                         signOutBreaker.fallback(() => 'Sorry, out of service right now');
                         signOutBreaker.on('fallback', () => console.log('Sorry, out of service right now'));
 
                         const response = await signOutBreaker.fire(message.toString())
-                        //console.log(response)
-                       
-                        //if (signInBreaker.stats.fallbacks > 0) {
-                          //  this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
-                        //}
+                      
                         
                      
-                        this.client.publish(this.signOutResponse, JSON.stringify(response))
+                        this.client.publish(this.signOutResponse, JSON.stringify(response), {qos:1})
                     
                         
                     }
@@ -197,53 +186,37 @@ export class MQTTController {
                 //Request for authorisation of use case
                 else if (topic === this.appointmentAuthRequest) {
                     
-                    /*const response = await this.authenticateUserQuery.execute(message.toString())
-                    
-                    if (response.isSuccess) {
-                        this.client.publish(this.appointmentRequest, message.toString())
-                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
-                    }
-
-                    else {
-                        this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
-                    }
-                    console.log(response)
-                */
-                
+            
                     const authenticateUserBreaker = new CircuitBreaker((encryptedMessage: string) => {
                         return this.authenticateUserQuery.execute(encryptedMessage);
                     }, this.options)
 
                     try {
                         
-                        authenticateUserBreaker.on('success', result => {console.log(result)});
+                      
                         authenticateUserBreaker.on('timeout', () => console.log('timeout') );
                         authenticateUserBreaker.on('reject', () => console.log('reject'));
                         authenticateUserBreaker.on('open', () => console.log('open'));
-                        authenticateUserBreaker.on('halfOpen', () => console.log('halfOpen'));
+                        //authenticateUserBreaker.on('halfOpen', () => console.log('halfOpen'));
                         authenticateUserBreaker.on('close', () => console.log('close'));
                         authenticateUserBreaker.fallback(() => 'Sorry, out of service right now');
                         authenticateUserBreaker.on('fallback', () => console.log('Sorry, out of service right now'));
 
                         const response = await authenticateUserBreaker.fire(message.toString())
-                        //console.log(response)
+                        
                        
                         if (response.isSuccess) {
+                            //console.log('executed')
                             this.client.publish(this.appointmentRequest, message.toString())
                             this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
                         }
 
                         else {
-                            this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
+                            this.client.publish(this.appointmentAuthResponse, JSON.stringify(response), {qos:1})
                         }
-                            console.log(response)
-                        
-                        //if (signInBreaker.stats.fallbacks > 0) {
-                          //  this.client.publish(this.signInResponse, JSON.stringify({message:'CircuitBreaker activated'}))
-                        //}
-                        
+                         
                      
-                        this.client.publish(this.signInResponse, JSON.stringify(response))
+                        
                     
                         
                     }
@@ -254,22 +227,7 @@ export class MQTTController {
                 
                 }
                 
-                /*else if(topic === this.appointmentResponse) {
-                    console.log('--------------------------------')
-                    console.log(message.toString())
-                }
-                else if (topic === this.signOutResponse) {
-                    console.log(message.toString());
-                }
-                else if(topic === this.appointmentAuthResponse) {
-                    console.log(message.toString())
-                }
-                else if(topic === "authentication/signIn/response") {
-                    counter++
-                    console.log("Sign in response: " + message.toString())
-                    console.log(counter)
-                }
-                */
+              
             })    
         })
         

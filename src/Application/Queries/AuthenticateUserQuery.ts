@@ -29,7 +29,7 @@ export class AuthenticateUserQuery {
     }
 
 
-    console.log(message)
+ 
 
     const user = await this.userRepository.getUserById(message.id);
 
