@@ -20,33 +20,34 @@ export class MQTTController {
                 readonly signOutUserCommand: SignOutUserCommand,
                 readonly authenticateUserQuery: AuthenticateUserQuery){}
     //This is on standby due to complications in testing circuitbreaker
-    readonly mqttoptions: IClientOptions = {
+    /*readonly mqttoptions: IClientOptions = {
         port: 8883,
         host: 'cb9fe4f292fe4099ae5eeb9f230c8346.s2.eu.hivemq.cloud',
         protocol: 'mqtts',
         username: 'T2Project',
         password: 'Mamamia1234.'
         }
+    */
 
     options: CircuitBreaker.Options = {
-        timeout: 500, // If our function takes longer than 3 seconds, trigger a failure
+        timeout: 100, // If our function takes longer than 3 seconds, trigger a failure
         errorThresholdPercentage: 50,// When 50% of requests fail, trip the circuit
         resetTimeout: 5000 // After 30 seconds, try again.
         };
 
 
-    /*
+    
     readonly client = mqtt.connect('mqtt://broker.hivemq.com',{
         port: 1883,
         username: 'T2Project',
         password: 'Mamamia1234.',
 
     });
-    */
+    
 
 
 
-    readonly client = mqtt.connect(this.mqttoptions);
+    //readonly client = mqtt.connect(this.mqttoptions);
 
     readonly authenticationRequest = 'authentication/#'
 
@@ -136,7 +137,11 @@ export class MQTTController {
                         signUpBreaker.on('fallback', () => console.log('Sorry, out of service right now'));
 
                         const response = await signUpBreaker.fire(message.toString())
-
+                        if(response.isSuccess) {
+                            console.log("-------------------------------");
+                            console.log("User Signed Up Successfully: ");
+                            console.log(response)
+                        }
                         this.client.publish(this.signUpResponse, JSON.stringify(response), {qos:1})
 
 
@@ -168,7 +173,12 @@ export class MQTTController {
 
                         const response = await signOutBreaker.fire(message.toString())
 
-
+                        if(response.isSuccess) {
+                        
+                            console.log("-------------------------------");
+                            console.log("User Signed Out Successfully: ");
+                            console.log(response)
+                        }
 
                         this.client.publish(this.signOutResponse, JSON.stringify(response), {qos:1})
 
@@ -205,6 +215,9 @@ export class MQTTController {
 
                         if (response.isSuccess) {
                             //console.log('executed')
+                            console.log('--------------------------')
+                            console.log("Appointment Request Made: ")
+                            console.log(response)
                             this.client.publish(this.appointmentRequest, message.toString())
                             this.client.publish(this.appointmentAuthResponse, JSON.stringify(response))
                         }
